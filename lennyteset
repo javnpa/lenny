@@ -1,4 +1,4 @@
--- LENNY HUB V2.0 - ADVANCED EDITION
+here-- LENNY HUB V2.0 - ADVANCED EDITION
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -10,228 +10,8 @@ local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = Workspace.CurrentCamera
 
--- VERSION CONTROL
+-- VERSION
 local CURRENT_VERSION = "2.0.0"
-local VERSION_FILE = "LennyHub_LastVersion.txt"
-
-local function GetLastSeenVersion()
-    if isfile and isfile(VERSION_FILE) then
-        return readfile(VERSION_FILE)
-    end
-    return "0.0.0"
-end
-
-local function MarkVersionAsSeen()
-    if writefile then
-        writefile(VERSION_FILE, CURRENT_VERSION)
-    end
-end
-
-local function ShowUpdateLog()
-    local lastVersion = GetLastSeenVersion()
-    if lastVersion == CURRENT_VERSION then
-        return false
-    end
-    return true
-end
-
--- UPDATE LOG GUI
-if ShowUpdateLog() then
-    local UpdateGui = Instance.new("ScreenGui")
-    UpdateGui.Name = "UpdateLog"
-    UpdateGui.ResetOnSpawn = false
-    UpdateGui.IgnoreGuiInset = true
-    UpdateGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    if gethui then UpdateGui.Parent = gethui() else UpdateGui.Parent = CoreGui end
-
-    local UpdateBg = Instance.new("Frame", UpdateGui)
-    UpdateBg.Size = UDim2.new(1, 0, 1, 0)
-    UpdateBg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    UpdateBg.BackgroundTransparency = 0.4
-    UpdateBg.BorderSizePixel = 0
-    UpdateBg.ZIndex = 1000
-
-    local UpdateFrame = Instance.new("Frame", UpdateBg)
-    UpdateFrame.Size = UDim2.new(0, 450, 0, 500)
-    UpdateFrame.Position = UDim2.new(0.5, -225, 0.5, -250)
-    UpdateFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-    UpdateFrame.BorderSizePixel = 0
-    UpdateFrame.ZIndex = 1001
-
-    local UpdateCorner = Instance.new("UICorner", UpdateFrame)
-    UpdateCorner.CornerRadius = UDim.new(0, 12)
-
-    local UpdateStroke = Instance.new("UIStroke", UpdateFrame)
-    UpdateStroke.Color = Color3.fromRGB(147, 51, 234)
-    UpdateStroke.Thickness = 3
-
-    local UpdateTopBar = Instance.new("Frame", UpdateFrame)
-    UpdateTopBar.Size = UDim2.new(1, 0, 0, 50)
-    UpdateTopBar.BackgroundColor3 = Color3.fromRGB(147, 51, 234)
-    UpdateTopBar.BorderSizePixel = 0
-    UpdateTopBar.ZIndex = 1002
-
-    local UpdateTopCorner = Instance.new("UICorner", UpdateTopBar)
-    UpdateTopCorner.CornerRadius = UDim.new(0, 12)
-
-    local UpdateTopCover = Instance.new("Frame", UpdateTopBar)
-    UpdateTopCover.Size = UDim2.new(1, 0, 0, 15)
-    UpdateTopCover.Position = UDim2.new(0, 0, 1, -15)
-    UpdateTopCover.BackgroundColor3 = Color3.fromRGB(147, 51, 234)
-    UpdateTopCover.BorderSizePixel = 0
-    UpdateTopCover.ZIndex = 1002
-
-    local UpdateTitle = Instance.new("TextLabel", UpdateTopBar)
-    UpdateTitle.Size = UDim2.new(1, -60, 1, 0)
-    UpdateTitle.Position = UDim2.new(0, 15, 0, 0)
-    UpdateTitle.BackgroundTransparency = 1
-    UpdateTitle.Text = "🎉 LENNY HUB - UPDATE V" .. CURRENT_VERSION
-    UpdateTitle.TextColor3 = Color3.new(1, 1, 1)
-    UpdateTitle.Font = Enum.Font.GothamBlack
-    UpdateTitle.TextSize = 18
-    UpdateTitle.TextXAlignment = Enum.TextXAlignment.Left
-    UpdateTitle.ZIndex = 1003
-
-    local CloseUpdateBtn = Instance.new("TextButton", UpdateTopBar)
-    CloseUpdateBtn.Size = UDim2.new(0, 35, 0, 35)
-    CloseUpdateBtn.Position = UDim2.new(1, -42, 0.5, -17.5)
-    CloseUpdateBtn.BackgroundColor3 = Color3.fromRGB(239, 68, 68)
-    CloseUpdateBtn.Text = "×"
-    CloseUpdateBtn.TextColor3 = Color3.new(1, 1, 1)
-    CloseUpdateBtn.Font = Enum.Font.GothamBlack
-    CloseUpdateBtn.TextSize = 24
-    CloseUpdateBtn.AutoButtonColor = false
-    CloseUpdateBtn.ZIndex = 1003
-
-    local CloseUpdateCorner = Instance.new("UICorner", CloseUpdateBtn)
-    CloseUpdateCorner.CornerRadius = UDim.new(0, 8)
-
-    local ScrollFrame = Instance.new("ScrollingFrame", UpdateFrame)
-    ScrollFrame.Size = UDim2.new(1, -30, 1, -80)
-    ScrollFrame.Position = UDim2.new(0, 15, 0, 60)
-    ScrollFrame.BackgroundTransparency = 1
-    ScrollFrame.BorderSizePixel = 0
-    ScrollFrame.ScrollBarThickness = 4
-    ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(147, 51, 234)
-    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-    ScrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    ScrollFrame.ZIndex = 1002
-
-    local UpdateLayout = Instance.new("UIListLayout", ScrollFrame)
-    UpdateLayout.Padding = UDim.new(0, 12)
-    UpdateLayout.SortOrder = Enum.SortOrder.LayoutOrder
-
-    local changelog = {
-        {
-            category = "🎯 ESP SYSTEM",
-            changes = {
-                "• Name Tags with customizable colors",
-                "• Distance Display",
-                "• Health Bars with gradient",
-                "• Box ESP (2D/3D)",
-                "• Tracer Lines from screen center",
-                "• Adjustable transparency & thickness",
-                "• Individual toggle for each ESP element"
-            }
-        },
-        {
-            category = "🔫 AIMBOT IMPROVEMENTS",
-            "• Fixed FOV circle detection",
-            "• Added Legit Mode for long-range",
-            "• Improved smoothing algorithm",
-            "• Better prediction system",
-            "• Sticky lock option"
-        },
-        {
-            category = "🎨 UI ENHANCEMENTS",
-            changes = {
-                "• Complete UI redesign",
-                "• Tab system for organization",
-                "• Collapsible sections",
-                "• Better mobile support",
-                "• Customizable colors",
-                "• Position saving"
-            }
-        },
-        {
-            category = "⚙️ NEW FEATURES",
-            changes = {
-                "• Version control system",
-                "• Update changelog viewer",
-                "• Advanced config management",
-                "• Performance optimization",
-                "• Bug fixes and stability"
-            }
-        }
-    }
-
-    for i, section in ipairs(changelog) do
-        local SectionFrame = Instance.new("Frame", ScrollFrame)
-        SectionFrame.Size = UDim2.new(1, 0, 0, 0)
-        SectionFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-        SectionFrame.BorderSizePixel = 0
-        SectionFrame.AutomaticSize = Enum.AutomaticSize.Y
-        SectionFrame.LayoutOrder = i
-        SectionFrame.ZIndex = 1002
-
-        local SectionCorner = Instance.new("UICorner", SectionFrame)
-        SectionCorner.CornerRadius = UDim.new(0, 8)
-
-        local SectionTitle = Instance.new("TextLabel", SectionFrame)
-        SectionTitle.Size = UDim2.new(1, -20, 0, 30)
-        SectionTitle.Position = UDim2.new(0, 10, 0, 5)
-        SectionTitle.BackgroundTransparency = 1
-        SectionTitle.Text = section.category
-        SectionTitle.TextColor3 = Color3.fromRGB(147, 51, 234)
-        SectionTitle.Font = Enum.Font.GothamBold
-        SectionTitle.TextSize = 14
-        SectionTitle.TextXAlignment = Enum.TextXAlignment.Left
-        SectionTitle.ZIndex = 1003
-
-        local ChangesText = Instance.new("TextLabel", SectionFrame)
-        ChangesText.Size = UDim2.new(1, -20, 0, 0)
-        ChangesText.Position = UDim2.new(0, 10, 0, 35)
-        ChangesText.BackgroundTransparency = 1
-        ChangesText.Text = table.concat(section.changes, "\n")
-        ChangesText.TextColor3 = Color3.fromRGB(200, 200, 200)
-        ChangesText.Font = Enum.Font.Gotham
-        ChangesText.TextSize = 12
-        ChangesText.TextXAlignment = Enum.TextXAlignment.Left
-        ChangesText.TextYAlignment = Enum.TextYAlignment.Top
-        ChangesText.TextWrapped = true
-        ChangesText.AutomaticSize = Enum.AutomaticSize.Y
-        ChangesText.ZIndex = 1003
-
-        local Padding = Instance.new("UIPadding", SectionFrame)
-        Padding.PaddingBottom = UDim.new(0, 10)
-    end
-
-    CloseUpdateBtn.MouseButton1Click:Connect(function()
-        MarkVersionAsSeen()
-        UpdateGui:Destroy()
-    end)
-
-    CloseUpdateBtn.MouseEnter:Connect(function()
-        TweenService:Create(CloseUpdateBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(220, 50, 50)}):Play()
-    end)
-
-    CloseUpdateBtn.MouseLeave:Connect(function()
-        TweenService:Create(CloseUpdateBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(239, 68, 68)}):Play()
-    end)
-
-    -- Auto-close after reading
-    spawn(function()
-        wait(30) -- Auto close after 30 seconds
-        if UpdateGui and UpdateGui.Parent then
-            MarkVersionAsSeen()
-            UpdateGui:Destroy()
-        end
-    end)
-
-    -- Wait for user to close update log
-    repeat wait() until not UpdateGui or not UpdateGui.Parent
-    wait(0.5)
-end
 
 -- // KEY SYSTEM //
 local CORRECT_KEY = "Elena"
@@ -627,6 +407,19 @@ function StartMainScript()
     Title.TextSize = 15
     Title.TextXAlignment = Enum.TextXAlignment.Left
 
+    local SuggestBtn = Instance.new("TextButton", TopBar)
+    SuggestBtn.Size = UDim2.new(0, 28, 0, 28)
+    SuggestBtn.Position = UDim2.new(1, -98, 0.5, -14)
+    SuggestBtn.BackgroundColor3 = Color3.fromRGB(59, 130, 246)
+    SuggestBtn.Text = "?"
+    SuggestBtn.TextColor3 = Color3.new(1, 1, 1)
+    SuggestBtn.Font = Enum.Font.GothamBold
+    SuggestBtn.TextSize = 16
+    SuggestBtn.AutoButtonColor = false
+
+    local SuggestCorner = Instance.new("UICorner", SuggestBtn)
+    SuggestCorner.CornerRadius = UDim.new(0, 6)
+
     local MinimizeBtn = Instance.new("TextButton", TopBar)
     MinimizeBtn.Size = UDim2.new(0, 28, 0, 28)
     MinimizeBtn.Position = UDim2.new(1, -65, 0.5, -14)
@@ -671,6 +464,190 @@ function StartMainScript()
     local RestoreStroke = Instance.new("UIStroke", RestoreBtn)
     RestoreStroke.Color = Color3.fromRGB(147, 51, 234)
     RestoreStroke.Thickness = 3
+
+    -- UPDATE LOG / CHANGELOG PANEL (? BUTTON)
+    local SuggestPanel = Instance.new("Frame", ScreenGui)
+    SuggestPanel.Size = UDim2.new(0, 450, 0, 500)
+    SuggestPanel.Position = UDim2.new(0.5, -225, 0.5, -250)
+    SuggestPanel.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    SuggestPanel.BorderSizePixel = 0
+    SuggestPanel.Visible = false
+    SuggestPanel.ZIndex = 600
+
+    local SuggestCorner = Instance.new("UICorner", SuggestPanel)
+    SuggestCorner.CornerRadius = UDim.new(0, 12)
+
+    local SuggestStroke = Instance.new("UIStroke", SuggestPanel)
+    SuggestStroke.Color = Color3.fromRGB(59, 130, 246)
+    SuggestStroke.Thickness = 3
+
+    local SuggestTopBar = Instance.new("Frame", SuggestPanel)
+    SuggestTopBar.Size = UDim2.new(1, 0, 0, 50)
+    SuggestTopBar.BackgroundColor3 = Color3.fromRGB(59, 130, 246)
+    SuggestTopBar.BorderSizePixel = 0
+    SuggestTopBar.ZIndex = 601
+
+    local SuggestTopCorner = Instance.new("UICorner", SuggestTopBar)
+    SuggestTopCorner.CornerRadius = UDim.new(0, 12)
+
+    local SuggestTopCover = Instance.new("Frame", SuggestTopBar)
+    SuggestTopCover.Size = UDim2.new(1, 0, 0, 15)
+    SuggestTopCover.Position = UDim2.new(0, 0, 1, -15)
+    SuggestTopCover.BackgroundColor3 = Color3.fromRGB(59, 130, 246)
+    SuggestTopCover.BorderSizePixel = 0
+    SuggestTopCover.ZIndex = 601
+
+    local SuggestTitle = Instance.new("TextLabel", SuggestTopBar)
+    SuggestTitle.Size = UDim2.new(1, -60, 1, 0)
+    SuggestTitle.Position = UDim2.new(0, 15, 0, 0)
+    SuggestTitle.BackgroundTransparency = 1
+    SuggestTitle.Text = "📋 CHANGELOG & TIPS - V" .. CURRENT_VERSION
+    SuggestTitle.TextColor3 = Color3.new(1, 1, 1)
+    SuggestTitle.Font = Enum.Font.GothamBlack
+    SuggestTitle.TextSize = 16
+    SuggestTitle.TextXAlignment = Enum.TextXAlignment.Left
+    SuggestTitle.ZIndex = 602
+
+    local SuggestClose = Instance.new("TextButton", SuggestTopBar)
+    SuggestClose.Size = UDim2.new(0, 35, 0, 35)
+    SuggestClose.Position = UDim2.new(1, -42, 0.5, -17.5)
+    SuggestClose.BackgroundColor3 = Color3.fromRGB(239, 68, 68)
+    SuggestClose.Text = "×"
+    SuggestClose.TextColor3 = Color3.new(1, 1, 1)
+    SuggestClose.Font = Enum.Font.GothamBlack
+    SuggestClose.TextSize = 24
+    SuggestClose.AutoButtonColor = false
+    SuggestClose.ZIndex = 602
+
+    local SuggestCloseCorner = Instance.new("UICorner", SuggestClose)
+    SuggestCloseCorner.CornerRadius = UDim.new(0, 8)
+
+    local SuggestScroll = Instance.new("ScrollingFrame", SuggestPanel)
+    SuggestScroll.Size = UDim2.new(1, -30, 1, -80)
+    SuggestScroll.Position = UDim2.new(0, 15, 0, 60)
+    SuggestScroll.BackgroundTransparency = 1
+    SuggestScroll.BorderSizePixel = 0
+    SuggestScroll.ScrollBarThickness = 4
+    SuggestScroll.ScrollBarImageColor3 = Color3.fromRGB(59, 130, 246)
+    SuggestScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+    SuggestScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    SuggestScroll.ZIndex = 601
+
+    local SuggestLayout = Instance.new("UIListLayout", SuggestScroll)
+    SuggestLayout.Padding = UDim.new(0, 12)
+    SuggestLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+    local changelog = {
+        {
+            category = "🎯 ESP SYSTEM",
+            changes = {
+                "• Name Tags with customizable colors",
+                "• Distance Display",
+                "• Health Bars with gradient",
+                "• Box ESP (2D/3D)",
+                "• Tracer Lines from screen center",
+                "• Adjustable transparency & thickness",
+                "• Individual toggle for each ESP element"
+            }
+        },
+        {
+            category = "🔫 AIMBOT IMPROVEMENTS",
+            changes = {
+                "• Fixed FOV circle detection",
+                "• Added Legit Mode for long-range",
+                "• Improved smoothing algorithm",
+                "• Better prediction system",
+                "• Sticky lock option"
+            }
+        },
+        {
+            category = "🎨 UI ENHANCEMENTS",
+            changes = {
+                "• Complete UI redesign",
+                "• Tab system for organization",
+                "• Collapsible sections",
+                "• Better mobile support",
+                "• Customizable colors",
+                "• Position saving"
+            }
+        },
+        {
+            category = "💡 PRO TIPS",
+            changes = {
+                "• Lower smoothness = More legit aim",
+                "• Use 100-150 FOV for best results",
+                "• Enable Wall Check to avoid walls",
+                "• Random aim part = Detection bypass",
+                "• Save your config after tweaking!",
+                "• Legit Mode for long-range combat"
+            }
+        }
+    }
+
+    for i, section in ipairs(changelog) do
+        local SectionFrame = Instance.new("Frame", SuggestScroll)
+        SectionFrame.Size = UDim2.new(1, 0, 0, 0)
+        SectionFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+        SectionFrame.BorderSizePixel = 0
+        SectionFrame.AutomaticSize = Enum.AutomaticSize.Y
+        SectionFrame.LayoutOrder = i
+        SectionFrame.ZIndex = 601
+
+        local SectionCorner = Instance.new("UICorner", SectionFrame)
+        SectionCorner.CornerRadius = UDim.new(0, 8)
+
+        local SectionTitle = Instance.new("TextLabel", SectionFrame)
+        SectionTitle.Size = UDim2.new(1, -20, 0, 30)
+        SectionTitle.Position = UDim2.new(0, 10, 0, 5)
+        SectionTitle.BackgroundTransparency = 1
+        SectionTitle.Text = section.category
+        SectionTitle.TextColor3 = Color3.fromRGB(59, 130, 246)
+        SectionTitle.Font = Enum.Font.GothamBold
+        SectionTitle.TextSize = 14
+        SectionTitle.TextXAlignment = Enum.TextXAlignment.Left
+        SectionTitle.ZIndex = 602
+
+        local ChangesText = Instance.new("TextLabel", SectionFrame)
+        ChangesText.Size = UDim2.new(1, -20, 0, 0)
+        ChangesText.Position = UDim2.new(0, 10, 0, 35)
+        ChangesText.BackgroundTransparency = 1
+        ChangesText.Text = table.concat(section.changes, "\n")
+        ChangesText.TextColor3 = Color3.fromRGB(200, 200, 200)
+        ChangesText.Font = Enum.Font.Gotham
+        ChangesText.TextSize = 12
+        ChangesText.TextXAlignment = Enum.TextXAlignment.Left
+        ChangesText.TextYAlignment = Enum.TextYAlignment.Top
+        ChangesText.TextWrapped = true
+        ChangesText.AutomaticSize = Enum.AutomaticSize.Y
+        ChangesText.ZIndex = 602
+
+        local Padding = Instance.new("UIPadding", SectionFrame)
+        Padding.PaddingBottom = UDim.new(0, 10)
+    end
+
+    SuggestBtn.MouseButton1Click:Connect(function()
+        SuggestPanel.Visible = not SuggestPanel.Visible
+    end)
+
+    SuggestClose.MouseButton1Click:Connect(function()
+        SuggestPanel.Visible = false
+    end)
+
+    SuggestBtn.MouseEnter:Connect(function()
+        TweenService:Create(SuggestBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80, 150, 255)}):Play()
+    end)
+
+    SuggestBtn.MouseLeave:Connect(function()
+        TweenService:Create(SuggestBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(59, 130, 246)}):Play()
+    end)
+
+    SuggestClose.MouseEnter:Connect(function()
+        TweenService:Create(SuggestClose, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(220, 50, 50)}):Play()
+    end)
+
+    SuggestClose.MouseLeave:Connect(function()
+        TweenService:Create(SuggestClose, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(239, 68, 68)}):Play()
+    end)
 
     -- TAB SYSTEM
     local TabContainer = Instance.new("Frame", MainFrame)
@@ -806,7 +783,6 @@ function StartMainScript()
         
         local espData = {}
         
-        -- Highlight for overall ESP
         local highlight = Instance.new("Highlight")
         highlight.Name = "ESP_" .. player.Name
         highlight.FillColor = RGBToColor3(Config.ESPColor)
@@ -817,7 +793,6 @@ function StartMainScript()
         highlight.Parent = CoreGui
         espData.Highlight = highlight
         
-        -- Name & Distance BillboardGui
         local billboard = Instance.new("BillboardGui")
         billboard.Name = "ESPBillboard"
         billboard.AlwaysOnTop = true
@@ -847,7 +822,6 @@ function StartMainScript()
         distanceLabel.TextStrokeTransparency = 0.5
         espData.DistanceLabel = distanceLabel
         
-        -- Health Bar
         local healthBar = Instance.new("BillboardGui")
         healthBar.Name = "ESPHealthBar"
         healthBar.AlwaysOnTop = true
@@ -918,13 +892,11 @@ function StartMainScript()
             end
             
             if Config.ESPEnabled then
-                -- Highlight
                 espData.Highlight.Adornee = character
                 espData.Highlight.FillColor = RGBToColor3(Config.ESPColor)
                 espData.Highlight.FillTransparency = Config.ESPTransparency
                 espData.Highlight.Enabled = true
                 
-                -- Name & Distance
                 espData.Billboard.Adornee = rootPart
                 espData.Billboard.Enabled = Config.ESPNames or Config.ESPDistance
                 espData.NameLabel.Visible = Config.ESPNames
@@ -940,7 +912,6 @@ function StartMainScript()
                     espData.DistanceLabel.Visible = false
                 end
                 
-                -- Health Bar
                 espData.HealthBar.Adornee = rootPart
                 espData.HealthBar.Enabled = Config.ESPHealth
                 if Config.ESPHealth then
@@ -1751,11 +1722,10 @@ function StartMainScript()
                 
                 local smoothness = Config.Smoothness
                 
-                -- Legit Mode: Slower aim at long range
                 if Config.LegitMode then
                     local distance = (Camera.CFrame.Position - targetPos).Magnitude
                     if distance > 200 then
-                        smoothness = smoothness * 0.3 -- Much slower at long range
+                        smoothness = smoothness * 0.3
                     end
                 end
                 
