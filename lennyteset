@@ -1,0 +1,1789 @@
+-- LENNY HUB V2.0 - ADVANCED EDITION
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local CoreGui = game:GetService("CoreGui")
+local Workspace = game:GetService("Workspace")
+local TweenService = game:GetService("TweenService")
+local HttpService = game:GetService("HttpService")
+
+local LocalPlayer = Players.LocalPlayer
+local Camera = Workspace.CurrentCamera
+
+-- VERSION CONTROL
+local CURRENT_VERSION = "2.0.0"
+local VERSION_FILE = "LennyHub_LastVersion.txt"
+
+local function GetLastSeenVersion()
+    if isfile and isfile(VERSION_FILE) then
+        return readfile(VERSION_FILE)
+    end
+    return "0.0.0"
+end
+
+local function MarkVersionAsSeen()
+    if writefile then
+        writefile(VERSION_FILE, CURRENT_VERSION)
+    end
+end
+
+local function ShowUpdateLog()
+    local lastVersion = GetLastSeenVersion()
+    if lastVersion == CURRENT_VERSION then
+        return false
+    end
+    return true
+end
+
+-- UPDATE LOG GUI
+if ShowUpdateLog() then
+    local UpdateGui = Instance.new("ScreenGui")
+    UpdateGui.Name = "UpdateLog"
+    UpdateGui.ResetOnSpawn = false
+    UpdateGui.IgnoreGuiInset = true
+    UpdateGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    if gethui then UpdateGui.Parent = gethui() else UpdateGui.Parent = CoreGui end
+
+    local UpdateBg = Instance.new("Frame", UpdateGui)
+    UpdateBg.Size = UDim2.new(1, 0, 1, 0)
+    UpdateBg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    UpdateBg.BackgroundTransparency = 0.4
+    UpdateBg.BorderSizePixel = 0
+    UpdateBg.ZIndex = 1000
+
+    local UpdateFrame = Instance.new("Frame", UpdateBg)
+    UpdateFrame.Size = UDim2.new(0, 450, 0, 500)
+    UpdateFrame.Position = UDim2.new(0.5, -225, 0.5, -250)
+    UpdateFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    UpdateFrame.BorderSizePixel = 0
+    UpdateFrame.ZIndex = 1001
+
+    local UpdateCorner = Instance.new("UICorner", UpdateFrame)
+    UpdateCorner.CornerRadius = UDim.new(0, 12)
+
+    local UpdateStroke = Instance.new("UIStroke", UpdateFrame)
+    UpdateStroke.Color = Color3.fromRGB(147, 51, 234)
+    UpdateStroke.Thickness = 3
+
+    local UpdateTopBar = Instance.new("Frame", UpdateFrame)
+    UpdateTopBar.Size = UDim2.new(1, 0, 0, 50)
+    UpdateTopBar.BackgroundColor3 = Color3.fromRGB(147, 51, 234)
+    UpdateTopBar.BorderSizePixel = 0
+    UpdateTopBar.ZIndex = 1002
+
+    local UpdateTopCorner = Instance.new("UICorner", UpdateTopBar)
+    UpdateTopCorner.CornerRadius = UDim.new(0, 12)
+
+    local UpdateTopCover = Instance.new("Frame", UpdateTopBar)
+    UpdateTopCover.Size = UDim2.new(1, 0, 0, 15)
+    UpdateTopCover.Position = UDim2.new(0, 0, 1, -15)
+    UpdateTopCover.BackgroundColor3 = Color3.fromRGB(147, 51, 234)
+    UpdateTopCover.BorderSizePixel = 0
+    UpdateTopCover.ZIndex = 1002
+
+    local UpdateTitle = Instance.new("TextLabel", UpdateTopBar)
+    UpdateTitle.Size = UDim2.new(1, -60, 1, 0)
+    UpdateTitle.Position = UDim2.new(0, 15, 0, 0)
+    UpdateTitle.BackgroundTransparency = 1
+    UpdateTitle.Text = "🎉 LENNY HUB - UPDATE V" .. CURRENT_VERSION
+    UpdateTitle.TextColor3 = Color3.new(1, 1, 1)
+    UpdateTitle.Font = Enum.Font.GothamBlack
+    UpdateTitle.TextSize = 18
+    UpdateTitle.TextXAlignment = Enum.TextXAlignment.Left
+    UpdateTitle.ZIndex = 1003
+
+    local CloseUpdateBtn = Instance.new("TextButton", UpdateTopBar)
+    CloseUpdateBtn.Size = UDim2.new(0, 35, 0, 35)
+    CloseUpdateBtn.Position = UDim2.new(1, -42, 0.5, -17.5)
+    CloseUpdateBtn.BackgroundColor3 = Color3.fromRGB(239, 68, 68)
+    CloseUpdateBtn.Text = "×"
+    CloseUpdateBtn.TextColor3 = Color3.new(1, 1, 1)
+    CloseUpdateBtn.Font = Enum.Font.GothamBlack
+    CloseUpdateBtn.TextSize = 24
+    CloseUpdateBtn.AutoButtonColor = false
+    CloseUpdateBtn.ZIndex = 1003
+
+    local CloseUpdateCorner = Instance.new("UICorner", CloseUpdateBtn)
+    CloseUpdateCorner.CornerRadius = UDim.new(0, 8)
+
+    local ScrollFrame = Instance.new("ScrollingFrame", UpdateFrame)
+    ScrollFrame.Size = UDim2.new(1, -30, 1, -80)
+    ScrollFrame.Position = UDim2.new(0, 15, 0, 60)
+    ScrollFrame.BackgroundTransparency = 1
+    ScrollFrame.BorderSizePixel = 0
+    ScrollFrame.ScrollBarThickness = 4
+    ScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(147, 51, 234)
+    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    ScrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    ScrollFrame.ZIndex = 1002
+
+    local UpdateLayout = Instance.new("UIListLayout", ScrollFrame)
+    UpdateLayout.Padding = UDim.new(0, 12)
+    UpdateLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+    local changelog = {
+        {
+            category = "🎯 ESP SYSTEM",
+            changes = {
+                "• Name Tags with customizable colors",
+                "• Distance Display",
+                "• Health Bars with gradient",
+                "• Box ESP (2D/3D)",
+                "• Tracer Lines from screen center",
+                "• Adjustable transparency & thickness",
+                "• Individual toggle for each ESP element"
+            }
+        },
+        {
+            category = "🔫 AIMBOT IMPROVEMENTS",
+            "• Fixed FOV circle detection",
+            "• Added Legit Mode for long-range",
+            "• Improved smoothing algorithm",
+            "• Better prediction system",
+            "• Sticky lock option"
+        },
+        {
+            category = "🎨 UI ENHANCEMENTS",
+            changes = {
+                "• Complete UI redesign",
+                "• Tab system for organization",
+                "• Collapsible sections",
+                "• Better mobile support",
+                "• Customizable colors",
+                "• Position saving"
+            }
+        },
+        {
+            category = "⚙️ NEW FEATURES",
+            changes = {
+                "• Version control system",
+                "• Update changelog viewer",
+                "• Advanced config management",
+                "• Performance optimization",
+                "• Bug fixes and stability"
+            }
+        }
+    }
+
+    for i, section in ipairs(changelog) do
+        local SectionFrame = Instance.new("Frame", ScrollFrame)
+        SectionFrame.Size = UDim2.new(1, 0, 0, 0)
+        SectionFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+        SectionFrame.BorderSizePixel = 0
+        SectionFrame.AutomaticSize = Enum.AutomaticSize.Y
+        SectionFrame.LayoutOrder = i
+        SectionFrame.ZIndex = 1002
+
+        local SectionCorner = Instance.new("UICorner", SectionFrame)
+        SectionCorner.CornerRadius = UDim.new(0, 8)
+
+        local SectionTitle = Instance.new("TextLabel", SectionFrame)
+        SectionTitle.Size = UDim2.new(1, -20, 0, 30)
+        SectionTitle.Position = UDim2.new(0, 10, 0, 5)
+        SectionTitle.BackgroundTransparency = 1
+        SectionTitle.Text = section.category
+        SectionTitle.TextColor3 = Color3.fromRGB(147, 51, 234)
+        SectionTitle.Font = Enum.Font.GothamBold
+        SectionTitle.TextSize = 14
+        SectionTitle.TextXAlignment = Enum.TextXAlignment.Left
+        SectionTitle.ZIndex = 1003
+
+        local ChangesText = Instance.new("TextLabel", SectionFrame)
+        ChangesText.Size = UDim2.new(1, -20, 0, 0)
+        ChangesText.Position = UDim2.new(0, 10, 0, 35)
+        ChangesText.BackgroundTransparency = 1
+        ChangesText.Text = table.concat(section.changes, "\n")
+        ChangesText.TextColor3 = Color3.fromRGB(200, 200, 200)
+        ChangesText.Font = Enum.Font.Gotham
+        ChangesText.TextSize = 12
+        ChangesText.TextXAlignment = Enum.TextXAlignment.Left
+        ChangesText.TextYAlignment = Enum.TextYAlignment.Top
+        ChangesText.TextWrapped = true
+        ChangesText.AutomaticSize = Enum.AutomaticSize.Y
+        ChangesText.ZIndex = 1003
+
+        local Padding = Instance.new("UIPadding", SectionFrame)
+        Padding.PaddingBottom = UDim.new(0, 10)
+    end
+
+    CloseUpdateBtn.MouseButton1Click:Connect(function()
+        MarkVersionAsSeen()
+        UpdateGui:Destroy()
+    end)
+
+    CloseUpdateBtn.MouseEnter:Connect(function()
+        TweenService:Create(CloseUpdateBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(220, 50, 50)}):Play()
+    end)
+
+    CloseUpdateBtn.MouseLeave:Connect(function()
+        TweenService:Create(CloseUpdateBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(239, 68, 68)}):Play()
+    end)
+
+    -- Auto-close after reading
+    spawn(function()
+        wait(30) -- Auto close after 30 seconds
+        if UpdateGui and UpdateGui.Parent then
+            MarkVersionAsSeen()
+            UpdateGui:Destroy()
+        end
+    end)
+
+    -- Wait for user to close update log
+    repeat wait() until not UpdateGui or not UpdateGui.Parent
+    wait(0.5)
+end
+
+-- // KEY SYSTEM //
+local CORRECT_KEY = "Elena"
+local KeyAuthorized = false
+
+local KeyGui = Instance.new("ScreenGui")
+KeyGui.Name = "KeySystem"
+KeyGui.ResetOnSpawn = false
+KeyGui.IgnoreGuiInset = true
+if gethui then KeyGui.Parent = gethui() else KeyGui.Parent = CoreGui end
+
+local KeyBg = Instance.new("Frame", KeyGui)
+KeyBg.Size = UDim2.new(1, 0, 1, 0)
+KeyBg.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
+KeyBg.BackgroundTransparency = 0.3
+KeyBg.BorderSizePixel = 0
+
+local KeyFrame = Instance.new("Frame", KeyBg)
+KeyFrame.Size = UDim2.new(0, 350, 0, 200)
+KeyFrame.Position = UDim2.new(0.5, -175, 0.5, -100)
+KeyFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+KeyFrame.BorderSizePixel = 0
+
+local KeyFrameCorner = Instance.new("UICorner", KeyFrame)
+KeyFrameCorner.CornerRadius = UDim.new(0, 12)
+
+local KeyFrameStroke = Instance.new("UIStroke", KeyFrame)
+KeyFrameStroke.Color = Color3.fromRGB(147, 51, 234)
+KeyFrameStroke.Thickness = 2
+
+local KeyTitle = Instance.new("TextLabel", KeyFrame)
+KeyTitle.Size = UDim2.new(1, 0, 0, 50)
+KeyTitle.BackgroundTransparency = 1
+KeyTitle.Text = "LENNY HUB V" .. CURRENT_VERSION
+KeyTitle.TextColor3 = Color3.fromRGB(147, 51, 234)
+KeyTitle.Font = Enum.Font.GothamBlack
+KeyTitle.TextSize = 18
+
+local KeySubtitle = Instance.new("TextLabel", KeyFrame)
+KeySubtitle.Size = UDim2.new(1, -40, 0, 20)
+KeySubtitle.Position = UDim2.new(0, 20, 0, 55)
+KeySubtitle.BackgroundTransparency = 1
+KeySubtitle.Text = "Enter the key to continue"
+KeySubtitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+KeySubtitle.Font = Enum.Font.Gotham
+KeySubtitle.TextSize = 12
+
+local KeyInput = Instance.new("TextBox", KeyFrame)
+KeyInput.Size = UDim2.new(1, -40, 0, 40)
+KeyInput.Position = UDim2.new(0, 20, 0, 85)
+KeyInput.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+KeyInput.BorderSizePixel = 0
+KeyInput.PlaceholderText = "Enter Key..."
+KeyInput.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
+KeyInput.Text = ""
+KeyInput.TextColor3 = Color3.new(1, 1, 1)
+KeyInput.Font = Enum.Font.Gotham
+KeyInput.TextSize = 14
+KeyInput.ClearTextOnFocus = false
+
+local KeyInputCorner = Instance.new("UICorner", KeyInput)
+KeyInputCorner.CornerRadius = UDim.new(0, 8)
+
+local KeyInputStroke = Instance.new("UIStroke", KeyInput)
+KeyInputStroke.Color = Color3.fromRGB(147, 51, 234)
+KeyInputStroke.Thickness = 1
+KeyInputStroke.Transparency = 0.5
+
+local SubmitBtn = Instance.new("TextButton", KeyFrame)
+SubmitBtn.Size = UDim2.new(1, -40, 0, 40)
+SubmitBtn.Position = UDim2.new(0, 20, 0, 140)
+SubmitBtn.BackgroundColor3 = Color3.fromRGB(147, 51, 234)
+SubmitBtn.Text = "SUBMIT"
+SubmitBtn.TextColor3 = Color3.new(1, 1, 1)
+SubmitBtn.Font = Enum.Font.GothamBold
+SubmitBtn.TextSize = 14
+SubmitBtn.AutoButtonColor = false
+
+local SubmitCorner = Instance.new("UICorner", SubmitBtn)
+SubmitCorner.CornerRadius = UDim.new(0, 8)
+
+local StatusLabel = Instance.new("TextLabel", KeyFrame)
+StatusLabel.Size = UDim2.new(1, -40, 0, 20)
+StatusLabel.Position = UDim2.new(0, 20, 0, 185)
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.Text = ""
+StatusLabel.TextColor3 = Color3.fromRGB(239, 68, 68)
+StatusLabel.Font = Enum.Font.Gotham
+StatusLabel.TextSize = 11
+StatusLabel.Visible = false
+
+local function ValidateKey()
+    local enteredKey = KeyInput.Text
+    
+    if enteredKey == CORRECT_KEY then
+        StatusLabel.TextColor3 = Color3.fromRGB(34, 197, 94)
+        StatusLabel.Text = "Key Accepted! Loading..."
+        StatusLabel.Visible = true
+        SubmitBtn.BackgroundColor3 = Color3.fromRGB(34, 197, 94)
+        
+        wait(1)
+        KeyAuthorized = true
+        KeyGui:Destroy()
+        StartMainScript()
+    else
+        StatusLabel.TextColor3 = Color3.fromRGB(239, 68, 68)
+        StatusLabel.Text = "Invalid Key! Try again."
+        StatusLabel.Visible = true
+        SubmitBtn.BackgroundColor3 = Color3.fromRGB(239, 68, 68)
+        
+        TweenService:Create(KeyFrame, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, 0, true), 
+            {Position = UDim2.new(0.5, -165, 0.5, -100)}):Play()
+        
+        wait(0.2)
+        KeyFrame.Position = UDim2.new(0.5, -175, 0.5, -100)
+        SubmitBtn.BackgroundColor3 = Color3.fromRGB(147, 51, 234)
+        
+        wait(2)
+        StatusLabel.Visible = false
+        KeyInput.Text = ""
+    end
+end
+
+SubmitBtn.MouseButton1Click:Connect(ValidateKey)
+KeyInput.FocusLost:Connect(function(enterPressed)
+    if enterPressed then ValidateKey() end
+end)
+
+SubmitBtn.MouseEnter:Connect(function()
+    TweenService:Create(SubmitBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(170, 70, 255)}):Play()
+end)
+
+SubmitBtn.MouseLeave:Connect(function()
+    TweenService:Create(SubmitBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(147, 51, 234)}):Play()
+end)
+
+-- // MAIN SCRIPT FUNCTION //
+function StartMainScript()
+    local LoadingGui = Instance.new("ScreenGui")
+    LoadingGui.Name = "LoadingScreen"
+    LoadingGui.ResetOnSpawn = false
+    LoadingGui.IgnoreGuiInset = true
+    if gethui then LoadingGui.Parent = gethui() else LoadingGui.Parent = CoreGui end
+
+    local LoadingBg = Instance.new("Frame", LoadingGui)
+    LoadingBg.Size = UDim2.new(1, 0, 1, 0)
+    LoadingBg.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
+    LoadingBg.BorderSizePixel = 0
+
+    local LoadingFrame = Instance.new("Frame", LoadingBg)
+    LoadingFrame.Size = UDim2.new(0, 300, 0, 150)
+    LoadingFrame.Position = UDim2.new(0.5, -150, 0.5, -75)
+    LoadingFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    LoadingFrame.BorderSizePixel = 0
+
+    local LoadingCorner = Instance.new("UICorner", LoadingFrame)
+    LoadingCorner.CornerRadius = UDim.new(0, 12)
+
+    local LoadingStroke = Instance.new("UIStroke", LoadingFrame)
+    LoadingStroke.Color = Color3.fromRGB(147, 51, 234)
+    LoadingStroke.Thickness = 2
+
+    local LoadingTitle = Instance.new("TextLabel", LoadingFrame)
+    LoadingTitle.Size = UDim2.new(1, 0, 0, 40)
+    LoadingTitle.Position = UDim2.new(0, 0, 0, 20)
+    LoadingTitle.BackgroundTransparency = 1
+    LoadingTitle.Text = "LENNY HUB V" .. CURRENT_VERSION
+    LoadingTitle.TextColor3 = Color3.fromRGB(147, 51, 234)
+    LoadingTitle.Font = Enum.Font.GothamBlack
+    LoadingTitle.TextSize = 20
+
+    local LoadingStatus = Instance.new("TextLabel", LoadingFrame)
+    LoadingStatus.Size = UDim2.new(1, -40, 0, 20)
+    LoadingStatus.Position = UDim2.new(0, 20, 0, 70)
+    LoadingStatus.BackgroundTransparency = 1
+    LoadingStatus.Text = "Initializing..."
+    LoadingStatus.TextColor3 = Color3.fromRGB(200, 200, 200)
+    LoadingStatus.Font = Enum.Font.Gotham
+    LoadingStatus.TextSize = 12
+
+    local LoadingBar = Instance.new("Frame", LoadingFrame)
+    LoadingBar.Size = UDim2.new(0.85, 0, 0, 6)
+    LoadingBar.Position = UDim2.new(0.075, 0, 0, 105)
+    LoadingBar.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+    LoadingBar.BorderSizePixel = 0
+
+    local LoadingBarCorner = Instance.new("UICorner", LoadingBar)
+    LoadingBarCorner.CornerRadius = UDim.new(1, 0)
+
+    local LoadingProgress = Instance.new("Frame", LoadingBar)
+    LoadingProgress.Size = UDim2.new(0, 0, 1, 0)
+    LoadingProgress.BackgroundColor3 = Color3.fromRGB(147, 51, 234)
+    LoadingProgress.BorderSizePixel = 0
+
+    local LoadingProgressCorner = Instance.new("UICorner", LoadingProgress)
+    LoadingProgressCorner.CornerRadius = UDim.new(1, 0)
+
+    local loadingSteps = {
+        {text = "Initializing...", progress = 0.15},
+        {text = "Loading UI components...", progress = 0.3},
+        {text = "Setting up aim system...", progress = 0.5},
+        {text = "Configuring ESP...", progress = 0.7},
+        {text = "Loading advanced features...", progress = 0.85},
+        {text = "Complete!", progress = 1}
+    }
+
+    local DefaultConfig = {
+        -- Aimbot
+        AimEnabled = false,
+        LegitMode = false,
+        StickyLock = false,
+        TeamCheck = false,
+        WallCheck = false,
+        ShowFOV = false,
+        FOV = 120,
+        Smoothness = 0.25,
+        MaxDistance = 500,
+        Prediction = 0.1,
+        AimPart = "Head",
+        
+        -- ESP
+        ESPEnabled = false,
+        ESPNames = true,
+        ESPDistance = true,
+        ESPHealth = true,
+        ESPBoxes = false,
+        ESPTracers = false,
+        ESPTransparency = 0.4,
+        ESPThickness = 1,
+        
+        -- Highlight
+        HighlightEnabled = false,
+        HighlightColor = {0, 0, 0},
+        RainbowHighlight = false,
+        
+        -- Visuals
+        ShowCrosshair = false,
+        CrosshairSize = 14,
+        
+        -- Colors
+        FOVColor = {147, 51, 234},
+        CrosshairColor = {147, 51, 234},
+        ESPColor = {255, 0, 255},
+        ESPNameColor = {255, 255, 255},
+        ESPDistanceColor = {255, 255, 0},
+        ESPHealthColor = {0, 255, 0},
+        ESPBoxColor = {147, 51, 234},
+        ESPTracerColor = {147, 51, 234},
+        
+        -- Rainbow
+        RainbowFOV = false,
+        RainbowCrosshair = false,
+        RainbowESP = false,
+    }
+
+    local Config = {}
+    for k, v in pairs(DefaultConfig) do
+        if type(v) == "table" then
+            Config[k] = {v[1], v[2], v[3]}
+        else
+            Config[k] = v
+        end
+    end
+
+    local function RGBToColor3(rgb)
+        return Color3.fromRGB(rgb[1], rgb[2], rgb[3])
+    end
+
+    local RandomAimData = {ShotCount = 0, MaxShots = 5, CurrentPart = "Head"}
+    local ESPObjects = {}
+    local CurrentConfigSlot = 1
+    local MaxConfigSlots = 5
+    local ConfigFilePrefix = "LennyHub_Config_Slot_"
+    local RainbowHue = 0
+    local CurrentTab = "Combat"
+
+    local function GetConfigFileName()
+        return ConfigFilePrefix .. tostring(CurrentConfigSlot) .. ".json"
+    end
+
+    local function SaveConfig()
+        pcall(function()
+            local fileName = GetConfigFileName()
+            writefile(fileName, HttpService:JSONEncode(Config))
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "LENNY HUB",
+                Text = "Config saved to Slot " .. CurrentConfigSlot .. "!",
+                Duration = 3
+            })
+        end)
+    end
+
+    local function LoadConfig()
+        local success = pcall(function()
+            local fileName = GetConfigFileName()
+            if isfile and isfile(fileName) then
+                local loadedConfig = HttpService:JSONDecode(readfile(fileName))
+                for key, value in pairs(loadedConfig) do
+                    if Config[key] ~= nil then Config[key] = value end
+                end
+                game:GetService("StarterGui"):SetCore("SendNotification", {
+                    Title = "LENNY HUB",
+                    Text = "Config loaded from Slot " .. CurrentConfigSlot .. "!",
+                    Duration = 3
+                })
+                return true
+            else
+                game:GetService("StarterGui"):SetCore("SendNotification", {
+                    Title = "LENNY HUB",
+                    Text = "No config found in Slot " .. CurrentConfigSlot,
+                    Duration = 3
+                })
+            end
+        end)
+        return success
+    end
+
+    local function DeleteConfig()
+        pcall(function()
+            local fileName = GetConfigFileName()
+            if isfile and isfile(fileName) then
+                delfile(fileName)
+                game:GetService("StarterGui"):SetCore("SendNotification", {
+                    Title = "LENNY HUB",
+                    Text = "Config deleted from Slot " .. CurrentConfigSlot .. "!",
+                    Duration = 3
+                })
+            else
+                game:GetService("StarterGui"):SetCore("SendNotification", {
+                    Title = "LENNY HUB",
+                    Text = "No config to delete in Slot " .. CurrentConfigSlot,
+                    Duration = 3
+                })
+            end
+        end)
+    end
+
+    local function GetSavedSlotsCount()
+        local count = 0
+        for i = 1, MaxConfigSlots do
+            local fileName = ConfigFilePrefix .. tostring(i) .. ".json"
+            if isfile and isfile(fileName) then
+                count = count + 1
+            end
+        end
+        return count
+    end
+
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "LennyHub"
+    ScreenGui.ResetOnSpawn = false
+    ScreenGui.IgnoreGuiInset = true
+    if gethui then ScreenGui.Parent = gethui() else ScreenGui.Parent = CoreGui end
+
+    local MainFrame = Instance.new("Frame", ScreenGui)
+    MainFrame.Size = UDim2.new(0, 500, 0, 450)
+    MainFrame.Position = UDim2.new(0.5, -250, 0.5, -225)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 23)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Active = true
+    MainFrame.Draggable = true
+    MainFrame.Visible = false
+    MainFrame.ClipsDescendants = true
+
+    local MainCorner = Instance.new("UICorner", MainFrame)
+    MainCorner.CornerRadius = UDim.new(0, 10)
+
+    local MainStroke = Instance.new("UIStroke", MainFrame)
+    MainStroke.Color = Color3.fromRGB(147, 51, 234)
+    MainStroke.Thickness = 2
+
+    local TopBar = Instance.new("Frame", MainFrame)
+    TopBar.Size = UDim2.new(1, 0, 0, 42)
+    TopBar.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+    TopBar.BorderSizePixel = 0
+
+    local TopBarCorner = Instance.new("UICorner", TopBar)
+    TopBarCorner.CornerRadius = UDim.new(0, 10)
+
+    local TopBarCover = Instance.new("Frame", TopBar)
+    TopBarCover.Size = UDim2.new(1, 0, 0, 12)
+    TopBarCover.Position = UDim2.new(0, 0, 1, -12)
+    TopBarCover.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+    TopBarCover.BorderSizePixel = 0
+
+    local Title = Instance.new("TextLabel", TopBar)
+    Title.Size = UDim2.new(1, -110, 1, 0)
+    Title.Position = UDim2.new(0, 12, 0, 0)
+    Title.BackgroundTransparency = 1
+    Title.Text = "LENNY HUB V" .. CURRENT_VERSION
+    Title.TextColor3 = Color3.fromRGB(147, 51, 234)
+    Title.Font = Enum.Font.GothamBlack
+    Title.TextSize = 15
+    Title.TextXAlignment = Enum.TextXAlignment.Left
+
+    local MinimizeBtn = Instance.new("TextButton", TopBar)
+    MinimizeBtn.Size = UDim2.new(0, 28, 0, 28)
+    MinimizeBtn.Position = UDim2.new(1, -65, 0.5, -14)
+    MinimizeBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 110)
+    MinimizeBtn.Text = "−"
+    MinimizeBtn.TextColor3 = Color3.new(1, 1, 1)
+    MinimizeBtn.Font = Enum.Font.GothamBlack
+    MinimizeBtn.TextSize = 18
+    MinimizeBtn.AutoButtonColor = false
+
+    local MinimizeCorner = Instance.new("UICorner", MinimizeBtn)
+    MinimizeCorner.CornerRadius = UDim.new(0, 6)
+
+    local CloseBtn = Instance.new("TextButton", TopBar)
+    CloseBtn.Size = UDim2.new(0, 28, 0, 28)
+    CloseBtn.Position = UDim2.new(1, -32, 0.5, -14)
+    CloseBtn.BackgroundColor3 = Color3.fromRGB(239, 68, 68)
+    CloseBtn.Text = "×"
+    CloseBtn.TextColor3 = Color3.new(1, 1, 1)
+    CloseBtn.Font = Enum.Font.GothamBlack
+    CloseBtn.TextSize = 20
+    CloseBtn.AutoButtonColor = false
+
+    local CloseCorner = Instance.new("UICorner", CloseBtn)
+    CloseCorner.CornerRadius = UDim.new(0, 6)
+
+    local RestoreBtn = Instance.new("TextButton", ScreenGui)
+    RestoreBtn.Size = UDim2.new(0, 50, 0, 50)
+    RestoreBtn.Position = UDim2.new(0, 20, 0.5, -25)
+    RestoreBtn.BackgroundColor3 = Color3.fromRGB(147, 51, 234)
+    RestoreBtn.Text = "L"
+    RestoreBtn.TextColor3 = Color3.new(1, 1, 1)
+    RestoreBtn.Font = Enum.Font.GothamBlack
+    RestoreBtn.TextSize = 26
+    RestoreBtn.Visible = false
+    RestoreBtn.AutoButtonColor = false
+    RestoreBtn.ZIndex = 500
+
+    local RestoreCorner = Instance.new("UICorner", RestoreBtn)
+    RestoreCorner.CornerRadius = UDim.new(1, 0)
+
+    local RestoreStroke = Instance.new("UIStroke", RestoreBtn)
+    RestoreStroke.Color = Color3.fromRGB(147, 51, 234)
+    RestoreStroke.Thickness = 3
+
+    -- TAB SYSTEM
+    local TabContainer = Instance.new("Frame", MainFrame)
+    TabContainer.Size = UDim2.new(0, 120, 1, -52)
+    TabContainer.Position = UDim2.new(0, 8, 0, 46)
+    TabContainer.BackgroundColor3 = Color3.fromRGB(25, 25, 32)
+    TabContainer.BorderSizePixel = 0
+
+    local TabCorner = Instance.new("UICorner", TabContainer)
+    TabCorner.CornerRadius = UDim.new(0, 8)
+
+    local TabLayout = Instance.new("UIListLayout", TabContainer)
+    TabLayout.Padding = UDim.new(0, 4)
+    TabLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+    local TabPadding = Instance.new("UIPadding", TabContainer)
+    TabPadding.PaddingTop = UDim.new(0, 8)
+    TabPadding.PaddingBottom = UDim.new(0, 8)
+    TabPadding.PaddingLeft = UDim.new(0, 6)
+    TabPadding.PaddingRight = UDim.new(0, 6)
+
+    local Content = Instance.new("ScrollingFrame", MainFrame)
+    Content.Size = UDim2.new(1, -148, 1, -52)
+    Content.Position = UDim2.new(0, 136, 0, 46)
+    Content.BackgroundTransparency = 1
+    Content.BorderSizePixel = 0
+    Content.ScrollBarThickness = 3
+    Content.ScrollBarImageColor3 = Color3.fromRGB(147, 51, 234)
+    Content.CanvasSize = UDim2.new(0, 0, 0, 0)
+    Content.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    Content.Visible = false
+
+    local ContentLayout = Instance.new("UIListLayout", Content)
+    ContentLayout.Padding = UDim.new(0, 8)
+    ContentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+    local FOVCircle = Instance.new("Frame", ScreenGui)
+    FOVCircle.Size = UDim2.new(0, Config.FOV, 0, Config.FOV)
+    FOVCircle.BackgroundTransparency = 1
+    FOVCircle.Visible = false
+    FOVCircle.ZIndex = 10
+
+    local FOVStroke = Instance.new("UIStroke", FOVCircle)
+    FOVStroke.Color = RGBToColor3(Config.FOVColor)
+    FOVStroke.Thickness = 2
+    FOVStroke.Transparency = 0.3
+
+    local FOVCorner = Instance.new("UICorner", FOVCircle)
+    FOVCorner.CornerRadius = UDim.new(1, 0)
+
+    local Crosshair = Instance.new("Frame", ScreenGui)
+    Crosshair.Size = UDim2.new(0, 4, 0, 4)
+    Crosshair.BackgroundColor3 = RGBToColor3(Config.CrosshairColor)
+    Crosshair.BorderSizePixel = 0
+    Crosshair.Visible = false
+    Crosshair.ZIndex = 11
+
+    local CrosshairCorner = Instance.new("UICorner", Crosshair)
+    CrosshairCorner.CornerRadius = UDim.new(1, 0)
+
+    local HorizontalLine = Instance.new("Frame", ScreenGui)
+    HorizontalLine.Size = UDim2.new(0, Config.CrosshairSize, 0, 2)
+    HorizontalLine.BackgroundColor3 = RGBToColor3(Config.CrosshairColor)
+    HorizontalLine.BorderSizePixel = 0
+    HorizontalLine.BackgroundTransparency = 0.3
+    HorizontalLine.Visible = false
+    HorizontalLine.ZIndex = 11
+
+    local VerticalLine = Instance.new("Frame", ScreenGui)
+    VerticalLine.Size = UDim2.new(0, 2, 0, Config.CrosshairSize)
+    VerticalLine.BackgroundColor3 = RGBToColor3(Config.CrosshairColor)
+    VerticalLine.BorderSizePixel = 0
+    VerticalLine.BackgroundTransparency = 0.3
+    VerticalLine.Visible = false
+    VerticalLine.ZIndex = 11
+
+    local function UpdateFOVPosition()
+        local viewportSize = Camera.ViewportSize
+        local centerX = viewportSize.X / 2
+        local centerY = viewportSize.Y / 2
+        
+        FOVCircle.Position = UDim2.new(0, centerX - (Config.FOV / 2), 0, centerY - (Config.FOV / 2))
+        Crosshair.Position = UDim2.new(0, centerX - 2, 0, centerY - 2)
+        HorizontalLine.Position = UDim2.new(0, centerX - (Config.CrosshairSize / 2), 0, centerY - 1)
+        VerticalLine.Position = UDim2.new(0, centerX - 1, 0, centerY - (Config.CrosshairSize / 2))
+    end
+
+    local TargetHighlight = Instance.new("Highlight", CoreGui)
+    TargetHighlight.FillColor = RGBToColor3(Config.HighlightColor)
+    TargetHighlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+    TargetHighlight.FillTransparency = 0.5
+    TargetHighlight.OutlineTransparency = 0
+    TargetHighlight.Enabled = false
+
+    local function Animate(obj, property, value)
+        TweenService:Create(obj, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {[property] = value}):Play()
+    end
+
+    CloseBtn.MouseButton1Click:Connect(function()
+        Config.AimEnabled = false
+        Config.ESPEnabled = false
+        Config.HighlightEnabled = false
+        TargetHighlight.Enabled = false
+        for _, esp in pairs(ESPObjects) do 
+            for _, obj in pairs(esp) do
+                if obj then obj:Destroy() end
+            end
+        end
+        ScreenGui:Destroy()
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "LENNY HUB",
+            Text = "Thank you for using our service!",
+            Duration = 5
+        })
+    end)
+
+    MinimizeBtn.MouseButton1Click:Connect(function()
+        MainFrame.Visible = false
+        RestoreBtn.Visible = true
+    end)
+
+    RestoreBtn.MouseButton1Click:Connect(function()
+        MainFrame.Visible = true
+        RestoreBtn.Visible = false
+    end)
+
+    CloseBtn.MouseEnter:Connect(function() Animate(CloseBtn, "BackgroundColor3", Color3.fromRGB(220, 50, 50)) end)
+    CloseBtn.MouseLeave:Connect(function() Animate(CloseBtn, "BackgroundColor3", Color3.fromRGB(239, 68, 68)) end)
+
+    -- ADVANCED ESP SYSTEM
+    local function CreateESP(player)
+        if ESPObjects[player] then return end
+        
+        local espData = {}
+        
+        -- Highlight for overall ESP
+        local highlight = Instance.new("Highlight")
+        highlight.Name = "ESP_" .. player.Name
+        highlight.FillColor = RGBToColor3(Config.ESPColor)
+        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+        highlight.FillTransparency = Config.ESPTransparency
+        highlight.OutlineTransparency = 0
+        highlight.Enabled = false
+        highlight.Parent = CoreGui
+        espData.Highlight = highlight
+        
+        -- Name & Distance BillboardGui
+        local billboard = Instance.new("BillboardGui")
+        billboard.Name = "ESPBillboard"
+        billboard.AlwaysOnTop = true
+        billboard.Size = UDim2.new(0, 200, 0, 50)
+        billboard.StudsOffset = Vector3.new(0, 3, 0)
+        billboard.Parent = CoreGui
+        espData.Billboard = billboard
+        
+        local nameLabel = Instance.new("TextLabel", billboard)
+        nameLabel.Size = UDim2.new(1, 0, 0, 20)
+        nameLabel.BackgroundTransparency = 1
+        nameLabel.Text = player.Name
+        nameLabel.TextColor3 = RGBToColor3(Config.ESPNameColor)
+        nameLabel.Font = Enum.Font.GothamBold
+        nameLabel.TextSize = 14
+        nameLabel.TextStrokeTransparency = 0.5
+        espData.NameLabel = nameLabel
+        
+        local distanceLabel = Instance.new("TextLabel", billboard)
+        distanceLabel.Size = UDim2.new(1, 0, 0, 15)
+        distanceLabel.Position = UDim2.new(0, 0, 0, 20)
+        distanceLabel.BackgroundTransparency = 1
+        distanceLabel.Text = "0m"
+        distanceLabel.TextColor3 = RGBToColor3(Config.ESPDistanceColor)
+        distanceLabel.Font = Enum.Font.Gotham
+        distanceLabel.TextSize = 12
+        distanceLabel.TextStrokeTransparency = 0.5
+        espData.DistanceLabel = distanceLabel
+        
+        -- Health Bar
+        local healthBar = Instance.new("BillboardGui")
+        healthBar.Name = "ESPHealthBar"
+        healthBar.AlwaysOnTop = true
+        healthBar.Size = UDim2.new(0, 100, 0, 8)
+        healthBar.StudsOffset = Vector3.new(0, 4, 0)
+        healthBar.Parent = CoreGui
+        espData.HealthBar = healthBar
+        
+        local healthBg = Instance.new("Frame", healthBar)
+        healthBg.Size = UDim2.new(1, 0, 1, 0)
+        healthBg.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        healthBg.BorderSizePixel = 0
+        
+        local healthFill = Instance.new("Frame", healthBg)
+        healthFill.Size = UDim2.new(1, 0, 1, 0)
+        healthFill.BackgroundColor3 = RGBToColor3(Config.ESPHealthColor)
+        healthFill.BorderSizePixel = 0
+        espData.HealthFill = healthFill
+        
+        local healthGradient = Instance.new("UIGradient", healthFill)
+        healthGradient.Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
+            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 0)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 255, 0))
+        }
+        healthGradient.Rotation = 0
+        
+        ESPObjects[player] = espData
+    end
+
+    local function RemoveESP(player)
+        if ESPObjects[player] then
+            for _, obj in pairs(ESPObjects[player]) do
+                if obj then obj:Destroy() end
+            end
+            ESPObjects[player] = nil
+        end
+    end
+
+    local function UpdateESP()
+        for player, espData in pairs(ESPObjects) do
+            if not player or not player.Parent or not player.Character then
+                for _, obj in pairs(espData) do
+                    if obj and obj.Enabled ~= nil then obj.Enabled = false end
+                    if obj and obj.Visible ~= nil then obj.Visible = false end
+                end
+                continue
+            end
+            
+            local character = player.Character
+            local humanoid = character:FindFirstChild("Humanoid")
+            local rootPart = character:FindFirstChild("HumanoidRootPart") or character:FindFirstChild("Head")
+            
+            if not humanoid or humanoid.Health <= 0 or not rootPart then
+                for _, obj in pairs(espData) do
+                    if obj and obj.Enabled ~= nil then obj.Enabled = false end
+                    if obj and obj.Visible ~= nil then obj.Visible = false end
+                end
+                continue
+            end
+            
+            if Config.TeamCheck and player.Team and LocalPlayer.Team and player.Team == LocalPlayer.Team then
+                for _, obj in pairs(espData) do
+                    if obj and obj.Enabled ~= nil then obj.Enabled = false end
+                    if obj and obj.Visible ~= nil then obj.Visible = false end
+                end
+                continue
+            end
+            
+            if Config.ESPEnabled then
+                -- Highlight
+                espData.Highlight.Adornee = character
+                espData.Highlight.FillColor = RGBToColor3(Config.ESPColor)
+                espData.Highlight.FillTransparency = Config.ESPTransparency
+                espData.Highlight.Enabled = true
+                
+                -- Name & Distance
+                espData.Billboard.Adornee = rootPart
+                espData.Billboard.Enabled = Config.ESPNames or Config.ESPDistance
+                espData.NameLabel.Visible = Config.ESPNames
+                espData.NameLabel.TextColor3 = RGBToColor3(Config.ESPNameColor)
+                
+                if Config.ESPDistance then
+                    local distance = (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")) and 
+                                    (LocalPlayer.Character.HumanoidRootPart.Position - rootPart.Position).Magnitude or 0
+                    espData.DistanceLabel.Text = string.format("%dm", math.floor(distance))
+                    espData.DistanceLabel.Visible = true
+                    espData.DistanceLabel.TextColor3 = RGBToColor3(Config.ESPDistanceColor)
+                else
+                    espData.DistanceLabel.Visible = false
+                end
+                
+                -- Health Bar
+                espData.HealthBar.Adornee = rootPart
+                espData.HealthBar.Enabled = Config.ESPHealth
+                if Config.ESPHealth then
+                    local healthPercent = humanoid.Health / humanoid.MaxHealth
+                    espData.HealthFill.Size = UDim2.new(healthPercent, 0, 1, 0)
+                end
+            else
+                for _, obj in pairs(espData) do
+                    if obj and obj.Enabled ~= nil then obj.Enabled = false end
+                    if obj and obj.Visible ~= nil then obj.Visible = false end
+                end
+            end
+        end
+    end
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then 
+            CreateESP(player)
+        end
+    end
+
+    Players.PlayerAdded:Connect(CreateESP)
+    Players.PlayerRemoving:Connect(RemoveESP)
+
+    RunService.Heartbeat:Connect(function()
+        RainbowHue = (RainbowHue + 1) % 360
+        local rainbowColor = Color3.fromHSV(RainbowHue / 360, 1, 1)
+        
+        if Config.RainbowFOV then
+            Config.FOVColor = {math.floor(rainbowColor.R * 255), math.floor(rainbowColor.G * 255), math.floor(rainbowColor.B * 255)}
+            FOVStroke.Color = rainbowColor
+        end
+        
+        if Config.RainbowCrosshair then
+            Config.CrosshairColor = {math.floor(rainbowColor.R * 255), math.floor(rainbowColor.G * 255), math.floor(rainbowColor.B * 255)}
+            Crosshair.BackgroundColor3 = rainbowColor
+            HorizontalLine.BackgroundColor3 = rainbowColor
+            VerticalLine.BackgroundColor3 = rainbowColor
+        end
+        
+        if Config.RainbowESP then
+            Config.ESPColor = {math.floor(rainbowColor.R * 255), math.floor(rainbowColor.G * 255), math.floor(rainbowColor.B * 255)}
+        end
+        
+        if Config.RainbowHighlight then
+            Config.HighlightColor = {math.floor(rainbowColor.R * 255), math.floor(rainbowColor.G * 255), math.floor(rainbowColor.B * 255)}
+            TargetHighlight.FillColor = rainbowColor
+        end
+        
+        UpdateFOVPosition()
+        UpdateESP()
+    end)
+
+    -- UI COMPONENT CREATORS
+    local function CreateTab(name, icon)
+        local tab = Instance.new("TextButton", TabContainer)
+        tab.Size = UDim2.new(1, 0, 0, 36)
+        tab.BackgroundColor3 = CurrentTab == name and Color3.fromRGB(147, 51, 234) or Color3.fromRGB(35, 35, 42)
+        tab.Text = icon .. " " .. name
+        tab.TextColor3 = Color3.new(1, 1, 1)
+        tab.Font = Enum.Font.GothamBold
+        tab.TextSize = 12
+        tab.AutoButtonColor = false
+        tab.LayoutOrder = #TabContainer:GetChildren()
+        
+        local tabCorner = Instance.new("UICorner", tab)
+        tabCorner.CornerRadius = UDim.new(0, 6)
+        
+        local contentFrame = Instance.new("ScrollingFrame", MainFrame)
+        contentFrame.Name = name .. "Content"
+        contentFrame.Size = UDim2.new(1, -148, 1, -52)
+        contentFrame.Position = UDim2.new(0, 136, 0, 46)
+        contentFrame.BackgroundTransparency = 1
+        contentFrame.BorderSizePixel = 0
+        contentFrame.ScrollBarThickness = 3
+        contentFrame.ScrollBarImageColor3 = Color3.fromRGB(147, 51, 234)
+        contentFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+        contentFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        contentFrame.Visible = CurrentTab == name
+        
+        local contentLayout = Instance.new("UIListLayout", contentFrame)
+        contentLayout.Padding = UDim.new(0, 8)
+        contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        
+        tab.MouseButton1Click:Connect(function()
+            for _, child in pairs(TabContainer:GetChildren()) do
+                if child:IsA("TextButton") then
+                    child.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+                end
+            end
+            for _, child in pairs(MainFrame:GetChildren()) do
+                if child:IsA("ScrollingFrame") and child.Name:find("Content") then
+                    child.Visible = false
+                end
+            end
+            tab.BackgroundColor3 = Color3.fromRGB(147, 51, 234)
+            contentFrame.Visible = true
+            CurrentTab = name
+        end)
+        
+        tab.MouseEnter:Connect(function()
+            if CurrentTab ~= name then
+                Animate(tab, "BackgroundColor3", Color3.fromRGB(45, 45, 52))
+            end
+        end)
+        
+        tab.MouseLeave:Connect(function()
+            if CurrentTab ~= name then
+                Animate(tab, "BackgroundColor3", Color3.fromRGB(35, 35, 42))
+            end
+        end)
+        
+        return contentFrame
+    end
+
+    local function CreateSection(parent, title)
+        local section = Instance.new("Frame", parent)
+        section.Size = UDim2.new(1, 0, 0, 0)
+        section.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
+        section.BorderSizePixel = 0
+        section.AutomaticSize = Enum.AutomaticSize.Y
+        section.LayoutOrder = #parent:GetChildren()
+        
+        local sectionCorner = Instance.new("UICorner", section)
+        sectionCorner.CornerRadius = UDim.new(0, 8)
+        
+        local sectionTitle = Instance.new("TextLabel", section)
+        sectionTitle.Size = UDim2.new(1, -20, 0, 28)
+        sectionTitle.Position = UDim2.new(0, 12, 0, 0)
+        sectionTitle.BackgroundTransparency = 1
+        sectionTitle.Text = title
+        sectionTitle.TextColor3 = Color3.fromRGB(147, 51, 234)
+        sectionTitle.Font = Enum.Font.GothamBold
+        sectionTitle.TextSize = 13
+        sectionTitle.TextXAlignment = Enum.TextXAlignment.Left
+        
+        local divider = Instance.new("Frame", section)
+        divider.Size = UDim2.new(1, -24, 0, 1)
+        divider.Position = UDim2.new(0, 12, 0, 28)
+        divider.BackgroundColor3 = Color3.fromRGB(147, 51, 234)
+        divider.BorderSizePixel = 0
+        divider.BackgroundTransparency = 0.6
+        
+        local layout = Instance.new("UIListLayout", section)
+        layout.Padding = UDim.new(0, 6)
+        layout.SortOrder = Enum.SortOrder.LayoutOrder
+        
+        local padding = Instance.new("UIPadding", section)
+        padding.PaddingTop = UDim.new(0, 34)
+        padding.PaddingBottom = UDim.new(0, 8)
+        padding.PaddingLeft = UDim.new(0, 10)
+        padding.PaddingRight = UDim.new(0, 10)
+        
+        return section
+    end
+
+    local function CreateToggle(parent, text, settingName)
+        local toggle = Instance.new("Frame", parent)
+        toggle.Size = UDim2.new(1, 0, 0, 32)
+        toggle.BackgroundColor3 = Color3.fromRGB(38, 38, 46)
+        toggle.BorderSizePixel = 0
+        toggle.LayoutOrder = #parent:GetChildren()
+        
+        local toggleCorner = Instance.new("UICorner", toggle)
+        toggleCorner.CornerRadius = UDim.new(0, 6)
+        
+        local label = Instance.new("TextLabel", toggle)
+        label.Size = UDim2.new(1, -55, 1, 0)
+        label.Position = UDim2.new(0, 10, 0, 0)
+        label.BackgroundTransparency = 1
+        label.Text = text
+        label.TextColor3 = Color3.new(1, 1, 1)
+        label.Font = Enum.Font.Gotham
+        label.TextSize = 11
+        label.TextXAlignment = Enum.TextXAlignment.Left
+        
+        local switchBg = Instance.new("Frame", toggle)
+        switchBg.Size = UDim2.new(0, 42, 0, 22)
+        switchBg.Position = UDim2.new(1, -48, 0.5, -11)
+        switchBg.BackgroundColor3 = Config[settingName] and Color3.fromRGB(147, 51, 234) or Color3.fromRGB(70, 70, 80)
+        switchBg.BorderSizePixel = 0
+        
+        local switchCorner = Instance.new("UICorner", switchBg)
+        switchCorner.CornerRadius = UDim.new(1, 0)
+        
+        local switchKnob = Instance.new("Frame", switchBg)
+        switchKnob.Size = UDim2.new(0, 16, 0, 16)
+        switchKnob.Position = Config[settingName] and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)
+        switchKnob.BackgroundColor3 = Color3.new(1, 1, 1)
+        switchKnob.BorderSizePixel = 0
+        
+        local knobCorner = Instance.new("UICorner", switchKnob)
+        knobCorner.CornerRadius = UDim.new(1, 0)
+        
+        local button = Instance.new("TextButton", toggle)
+        button.Size = UDim2.new(1, 0, 1, 0)
+        button.BackgroundTransparency = 1
+        button.Text = ""
+        
+        button.MouseButton1Click:Connect(function()
+            Config[settingName] = not Config[settingName]
+            Animate(switchBg, "BackgroundColor3", Config[settingName] and Color3.fromRGB(147, 51, 234) or Color3.fromRGB(70, 70, 80))
+            Animate(switchKnob, "Position", Config[settingName] and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8))
+            
+            if settingName == "ShowFOV" then FOVCircle.Visible = Config.ShowFOV
+            elseif settingName == "ShowCrosshair" then
+                Crosshair.Visible = Config.ShowCrosshair
+                HorizontalLine.Visible = Config.ShowCrosshair
+                VerticalLine.Visible = Config.ShowCrosshair
+            elseif settingName == "HighlightEnabled" and not Config.HighlightEnabled then
+                TargetHighlight.Enabled = false
+            end
+        end)
+        
+        return toggle
+    end
+
+    local function CreateSlider(parent, text, min, max, settingName, format)
+        local slider = Instance.new("Frame", parent)
+        slider.Size = UDim2.new(1, 0, 0, 46)
+        slider.BackgroundColor3 = Color3.fromRGB(38, 38, 46)
+        slider.BorderSizePixel = 0
+        slider.LayoutOrder = #parent:GetChildren()
+        
+        local sliderCorner = Instance.new("UICorner", slider)
+        sliderCorner.CornerRadius = UDim.new(0, 6)
+        
+        local label = Instance.new("TextLabel", slider)
+        label.Size = UDim2.new(1, -65, 0, 18)
+        label.Position = UDim2.new(0, 10, 0, 6)
+        label.BackgroundTransparency = 1
+        label.Text = text
+        label.TextColor3 = Color3.new(1, 1, 1)
+        label.Font = Enum.Font.Gotham
+        label.TextSize = 11
+        label.TextXAlignment = Enum.TextXAlignment.Left
+        
+        local value = Instance.new("TextLabel", slider)
+        value.Size = UDim2.new(0, 50, 0, 18)
+        value.Position = UDim2.new(1, -58, 0, 6)
+        value.BackgroundTransparency = 1
+        value.Text = format and format(Config[settingName]) or tostring(Config[settingName])
+        value.TextColor3 = Color3.fromRGB(147, 51, 234)
+        value.Font = Enum.Font.GothamBold
+        value.TextSize = 11
+        
+        local track = Instance.new("Frame", slider)
+        track.Size = UDim2.new(1, -20, 0, 4)
+        track.Position = UDim2.new(0, 10, 0, 30)
+        track.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+        track.BorderSizePixel = 0
+        
+        local trackCorner = Instance.new("UICorner", track)
+        trackCorner.CornerRadius = UDim.new(1, 0)
+        
+        local fill = Instance.new("Frame", track)
+        fill.Size = UDim2.new((Config[settingName] - min) / (max - min), 0, 1, 0)
+        fill.BackgroundColor3 = Color3.fromRGB(147, 51, 234)
+        fill.BorderSizePixel = 0
+        
+        local fillCorner = Instance.new("UICorner", fill)
+        fillCorner.CornerRadius = UDim.new(1, 0)
+        
+        local knob = Instance.new("Frame", track)
+        knob.Size = UDim2.new(0, 12, 0, 12)
+        knob.Position = UDim2.new((Config[settingName] - min) / (max - min), -6, 0.5, -6)
+        knob.BackgroundColor3 = Color3.new(1, 1, 1)
+        knob.BorderSizePixel = 0
+        
+        local knobCorner = Instance.new("UICorner", knob)
+        knobCorner.CornerRadius = UDim.new(1, 0)
+        
+        local knobStroke = Instance.new("UIStroke", knob)
+        knobStroke.Color = Color3.fromRGB(147, 51, 234)
+        knobStroke.Thickness = 2
+        
+        local function updateValue(val)
+            val = math.clamp(val, min, max)
+            Config[settingName] = val
+            
+            local percent = (val - min) / (max - min)
+            fill.Size = UDim2.new(percent, 0, 1, 0)
+            knob.Position = UDim2.new(percent, -6, 0.5, -6)
+            value.Text = format and format(val) or tostring(val)
+            
+            if settingName == "FOV" then FOVCircle.Size = UDim2.new(0, val, 0, val)
+            elseif settingName == "CrosshairSize" then
+                HorizontalLine.Size = UDim2.new(0, val, 0, 2)
+                VerticalLine.Size = UDim2.new(0, 2, 0, val)
+            end
+        end
+        
+        local dragging = false
+        
+        knob.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+            end
+        end)
+        
+        UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = false
+            end
+        end)
+        
+        UserInputService.InputChanged:Connect(function(input)
+            if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                local mousePos = UserInputService:GetMouseLocation().X
+                local trackPos = track.AbsolutePosition.X
+                local trackSize = track.AbsoluteSize.X
+                local percent = math.clamp((mousePos - trackPos) / trackSize, 0, 1)
+                updateValue(min + (percent * (max - min)))
+            end
+        end)
+        
+        return slider
+    end
+
+    local function CreateColorSlider(parent, text, settingName, rainbowSetting)
+        local colorFrame = Instance.new("Frame", parent)
+        colorFrame.Size = UDim2.new(1, 0, 0, 110)
+        colorFrame.BackgroundColor3 = Color3.fromRGB(38, 38, 46)
+        colorFrame.BorderSizePixel = 0
+        colorFrame.LayoutOrder = #parent:GetChildren()
+        
+        local colorCorner = Instance.new("UICorner", colorFrame)
+        colorCorner.CornerRadius = UDim.new(0, 6)
+        
+        local label = Instance.new("TextLabel", colorFrame)
+        label.Size = UDim2.new(1, -75, 0, 22)
+        label.Position = UDim2.new(0, 10, 0, 6)
+        label.BackgroundTransparency = 1
+        label.Text = text
+        label.TextColor3 = Color3.new(1, 1, 1)
+        label.Font = Enum.Font.Gotham
+        label.TextSize = 11
+        label.TextXAlignment = Enum.TextXAlignment.Left
+        
+        local preview = Instance.new("Frame", colorFrame)
+        preview.Size = UDim2.new(0, 40, 0, 22)
+        preview.Position = UDim2.new(1, -75, 0, 6)
+        preview.BackgroundColor3 = RGBToColor3(Config[settingName])
+        preview.BorderSizePixel = 0
+        
+        local previewCorner = Instance.new("UICorner", preview)
+        previewCorner.CornerRadius = UDim.new(0, 5)
+        
+        local rainbowBtn = Instance.new("TextButton", colorFrame)
+        rainbowBtn.Size = UDim2.new(0, 28, 0, 22)
+        rainbowBtn.Position = UDim2.new(1, -30, 0, 6)
+        rainbowBtn.BackgroundColor3 = (rainbowSetting and Config[rainbowSetting]) and Color3.fromRGB(147, 51, 234) or Color3.fromRGB(60, 60, 70)
+        rainbowBtn.Text = "RGB"
+        rainbowBtn.TextColor3 = Color3.new(1, 1, 1)
+        rainbowBtn.Font = Enum.Font.GothamBold
+        rainbowBtn.TextSize = 9
+        rainbowBtn.AutoButtonColor = false
+        
+        local rainbowCorner = Instance.new("UICorner", rainbowBtn)
+        rainbowCorner.CornerRadius = UDim.new(0, 5)
+        
+        if rainbowSetting then
+            rainbowBtn.MouseButton1Click:Connect(function()
+                Config[rainbowSetting] = not Config[rainbowSetting]
+                rainbowBtn.BackgroundColor3 = Config[rainbowSetting] and Color3.fromRGB(147, 51, 234) or Color3.fromRGB(60, 60, 70)
+            end)
+        else
+            rainbowBtn.Visible = false
+        end
+        
+        local function createRGBSlider(colorName, index, yPos)
+            local track = Instance.new("Frame", colorFrame)
+            track.Size = UDim2.new(1, -100, 0, 3)
+            track.Position = UDim2.new(0, 50, 0, yPos)
+            track.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+            track.BorderSizePixel = 0
+            
+            local trackCorner = Instance.new("UICorner", track)
+            trackCorner.CornerRadius = UDim.new(1, 0)
+            
+            local fill = Instance.new("Frame", track)
+            fill.Size = UDim2.new(Config[settingName][index] / 255, 0, 1, 0)
+            fill.BackgroundColor3 = index == 1 and Color3.fromRGB(255, 0, 0) or (index == 2 and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(0, 0, 255))
+            fill.BorderSizePixel = 0
+            
+            local fillCorner = Instance.new("UICorner", fill)
+            fillCorner.CornerRadius = UDim.new(1, 0)
+            
+            local knob = Instance.new("Frame", track)
+            knob.Size = UDim2.new(0, 10, 0, 10)
+            knob.Position = UDim2.new(Config[settingName][index] / 255, -5, 0.5, -5)
+            knob.BackgroundColor3 = Color3.new(1, 1, 1)
+            knob.BorderSizePixel = 0
+            
+            local knobCorner = Instance.new("UICorner", knob)
+            knobCorner.CornerRadius = UDim.new(1, 0)
+            
+            local colorLabel = Instance.new("TextLabel", colorFrame)
+            colorLabel.Size = UDim2.new(0, 35, 0, 18)
+            colorLabel.Position = UDim2.new(0, 10, 0, yPos - 7)
+            colorLabel.BackgroundTransparency = 1
+            colorLabel.Text = colorName .. ":"
+            colorLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+            colorLabel.Font = Enum.Font.Gotham
+            colorLabel.TextSize = 10
+            colorLabel.TextXAlignment = Enum.TextXAlignment.Left
+            
+            local valueLabel = Instance.new("TextLabel", colorFrame)
+            valueLabel.Size = UDim2.new(0, 35, 0, 18)
+            valueLabel.Position = UDim2.new(1, -45, 0, yPos - 8)
+            valueLabel.BackgroundTransparency = 1
+            valueLabel.Text = tostring(Config[settingName][index])
+            valueLabel.TextColor3 = Color3.fromRGB(147, 51, 234)
+            valueLabel.Font = Enum.Font.GothamBold
+            valueLabel.TextSize = 10
+            
+            local function updateColor(val)
+                val = math.clamp(math.floor(val), 0, 255)
+                Config[settingName][index] = val
+                
+                local percent = val / 255
+                fill.Size = UDim2.new(percent, 0, 1, 0)
+                knob.Position = UDim2.new(percent, -5, 0.5, -5)
+                valueLabel.Text = tostring(val)
+                
+                local color = RGBToColor3(Config[settingName])
+                preview.BackgroundColor3 = color
+                
+                if rainbowSetting then
+                    Config[rainbowSetting] = false
+                    rainbowBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+                end
+                
+                if settingName == "FOVColor" then FOVStroke.Color = color
+                elseif settingName == "CrosshairColor" then
+                    Crosshair.BackgroundColor3 = color
+                    HorizontalLine.BackgroundColor3 = color
+                    VerticalLine.BackgroundColor3 = color
+                elseif settingName == "HighlightColor" then
+                    TargetHighlight.FillColor = color
+                end
+            end
+            
+            local dragging = false
+            
+            knob.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    dragging = true
+                end
+            end)
+            
+            UserInputService.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    dragging = false
+                end
+            end)
+            
+            UserInputService.InputChanged:Connect(function(input)
+                if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                    local mousePos = UserInputService:GetMouseLocation().X
+                    local trackPos = track.AbsolutePosition.X
+                    local trackSize = track.AbsoluteSize.X
+                    local percent = math.clamp((mousePos - trackPos) / trackSize, 0, 1)
+                    updateColor(percent * 255)
+                end
+            end)
+        end
+        
+        createRGBSlider("R", 1, 38)
+        createRGBSlider("G", 2, 60)
+        createRGBSlider("B", 3, 82)
+        
+        return colorFrame
+    end
+
+    local function CreateAimPartSelector(parent)
+        local selector = Instance.new("Frame", parent)
+        selector.Size = UDim2.new(1, 0, 0, 60)
+        selector.BackgroundColor3 = Color3.fromRGB(38, 38, 46)
+        selector.BorderSizePixel = 0
+        selector.LayoutOrder = #parent:GetChildren()
+        
+        local selectorCorner = Instance.new("UICorner", selector)
+        selectorCorner.CornerRadius = UDim.new(0, 6)
+        
+        local label = Instance.new("TextLabel", selector)
+        label.Size = UDim2.new(1, -20, 0, 20)
+        label.Position = UDim2.new(0, 10, 0, 6)
+        label.BackgroundTransparency = 1
+        label.Text = "Target Body Part"
+        label.TextColor3 = Color3.new(1, 1, 1)
+        label.Font = Enum.Font.Gotham
+        label.TextSize = 11
+        label.TextXAlignment = Enum.TextXAlignment.Left
+        
+        local options = {"Head", "Body", "Torso", "Random"}
+        
+        for i, option in ipairs(options) do
+            local btn = Instance.new("TextButton", selector)
+            btn.Size = UDim2.new(0, 65, 0, 26)
+            btn.Position = UDim2.new(0, 10 + ((i-1) * 70), 0, 30)
+            btn.BackgroundColor3 = Config.AimPart == option and Color3.fromRGB(147, 51, 234) or Color3.fromRGB(60, 60, 70)
+            btn.Text = option
+            btn.TextColor3 = Color3.new(1, 1, 1)
+            btn.Font = Enum.Font.GothamBold
+            btn.TextSize = 10
+            btn.AutoButtonColor = false
+            
+            local btnCorner = Instance.new("UICorner", btn)
+            btnCorner.CornerRadius = UDim.new(0, 5)
+            
+            btn.MouseButton1Click:Connect(function()
+                Config.AimPart = option
+                for _, child in pairs(selector:GetChildren()) do
+                    if child:IsA("TextButton") then
+                        child.BackgroundColor3 = child.Text == option and Color3.fromRGB(147, 51, 234) or Color3.fromRGB(60, 60, 70)
+                    end
+                end
+                if option == "Random" then RandomAimData.ShotCount = 0 end
+            end)
+        end
+        
+        return selector
+    end
+
+    local SavedConfigsLabel
+
+    local function CreateConfigButtons(parent)
+        local configFrame = Instance.new("Frame", parent)
+        configFrame.Size = UDim2.new(1, 0, 0, 110)
+        configFrame.BackgroundTransparency = 1
+        configFrame.LayoutOrder = #parent:GetChildren()
+
+        local slotLabel = Instance.new("TextLabel", configFrame)
+        slotLabel.Size = UDim2.new(0.5, 0, 0, 20)
+        slotLabel.Position = UDim2.new(0, 0, 0, 0)
+        slotLabel.BackgroundTransparency = 1
+        slotLabel.Text = "Config Slot: " .. CurrentConfigSlot
+        slotLabel.TextColor3 = Color3.fromRGB(147, 51, 234)
+        slotLabel.Font = Enum.Font.GothamBold
+        slotLabel.TextSize = 11
+        slotLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+        SavedConfigsLabel = Instance.new("TextLabel", configFrame)
+        SavedConfigsLabel.Size = UDim2.new(0.5, 0, 0, 20)
+        SavedConfigsLabel.Position = UDim2.new(0.5, 0, 0, 0)
+        SavedConfigsLabel.BackgroundTransparency = 1
+        SavedConfigsLabel.Text = "Saved: " .. GetSavedSlotsCount() .. "/" .. MaxConfigSlots
+        SavedConfigsLabel.TextColor3 = Color3.fromRGB(34, 197, 94)
+        SavedConfigsLabel.Font = Enum.Font.GothamBold
+        SavedConfigsLabel.TextSize = 11
+        SavedConfigsLabel.TextXAlignment = Enum.TextXAlignment.Right
+
+        local slotSelector = Instance.new("Frame", configFrame)
+        slotSelector.Size = UDim2.new(1, 0, 0, 28)
+        slotSelector.Position = UDim2.new(0, 0, 0, 25)
+        slotSelector.BackgroundTransparency = 1
+
+        for i = 1, MaxConfigSlots do
+            local slotBtn = Instance.new("TextButton", slotSelector)
+            slotBtn.Size = UDim2.new(0, 50, 0, 26)
+            slotBtn.Position = UDim2.new(0, (i-1) * 55, 0, 0)
+            slotBtn.BackgroundColor3 = CurrentConfigSlot == i and Color3.fromRGB(147, 51, 234) or Color3.fromRGB(60, 60, 70)
+            slotBtn.Text = tostring(i)
+            slotBtn.TextColor3 = Color3.new(1, 1, 1)
+            slotBtn.Font = Enum.Font.GothamBold
+            slotBtn.TextSize = 12
+            slotBtn.AutoButtonColor = false
+
+            local slotCorner = Instance.new("UICorner", slotBtn)
+            slotCorner.CornerRadius = UDim.new(0, 5)
+
+            slotBtn.MouseButton1Click:Connect(function()
+                CurrentConfigSlot = i
+                slotLabel.Text = "Config Slot: " .. CurrentConfigSlot
+                for _, child in pairs(slotSelector:GetChildren()) do
+                    if child:IsA("TextButton") then
+                        child.BackgroundColor3 = child.Text == tostring(i) and Color3.fromRGB(147, 51, 234) or Color3.fromRGB(60, 60, 70)
+                    end
+                end
+            end)
+        end
+
+        local saveBtn = Instance.new("TextButton", configFrame)
+        saveBtn.Size = UDim2.new(0.32, 0, 0, 28)
+        saveBtn.Position = UDim2.new(0, 0, 0, 58)
+        saveBtn.BackgroundColor3 = Color3.fromRGB(34, 197, 94)
+        saveBtn.Text = "SAVE"
+        saveBtn.TextColor3 = Color3.new(1, 1, 1)
+        saveBtn.Font = Enum.Font.GothamBold
+        saveBtn.TextSize = 11
+        saveBtn.AutoButtonColor = false
+
+        local saveCorner = Instance.new("UICorner", saveBtn)
+        saveCorner.CornerRadius = UDim.new(0, 6)
+
+        local loadBtn = Instance.new("TextButton", configFrame)
+        loadBtn.Size = UDim2.new(0.32, 0, 0, 28)
+        loadBtn.Position = UDim2.new(0.34, 0, 0, 58)
+        loadBtn.BackgroundColor3 = Color3.fromRGB(59, 130, 246)
+        loadBtn.Text = "LOAD"
+        loadBtn.TextColor3 = Color3.new(1, 1, 1)
+        loadBtn.Font = Enum.Font.GothamBold
+        loadBtn.TextSize = 11
+        loadBtn.AutoButtonColor = false
+
+        local loadCorner = Instance.new("UICorner", loadBtn)
+        loadCorner.CornerRadius = UDim.new(0, 6)
+
+        local deleteBtn = Instance.new("TextButton", configFrame)
+        deleteBtn.Size = UDim2.new(0.32, 0, 0, 28)
+        deleteBtn.Position = UDim2.new(0.68, 0, 0, 58)
+        deleteBtn.BackgroundColor3 = Color3.fromRGB(239, 68, 68)
+        deleteBtn.Text = "DELETE"
+        deleteBtn.TextColor3 = Color3.new(1, 1, 1)
+        deleteBtn.Font = Enum.Font.GothamBold
+        deleteBtn.TextSize = 11
+        deleteBtn.AutoButtonColor = false
+
+        local deleteCorner = Instance.new("UICorner", deleteBtn)
+        deleteCorner.CornerRadius = UDim.new(0, 6)
+
+        saveBtn.MouseButton1Click:Connect(function()
+            SaveConfig()
+            SavedConfigsLabel.Text = "Saved: " .. GetSavedSlotsCount() .. "/" .. MaxConfigSlots
+        end)
+
+        loadBtn.MouseButton1Click:Connect(function()
+            if LoadConfig() then
+                FOVCircle.Visible = Config.ShowFOV
+                FOVCircle.Size = UDim2.new(0, Config.FOV, 0, Config.FOV)
+                Crosshair.Visible = Config.ShowCrosshair
+                HorizontalLine.Visible = Config.ShowCrosshair
+                VerticalLine.Visible = Config.ShowCrosshair
+                HorizontalLine.Size = UDim2.new(0, Config.CrosshairSize, 0, 2)
+                VerticalLine.Size = UDim2.new(0, 2, 0, Config.CrosshairSize)
+            end
+        end)
+
+        deleteBtn.MouseButton1Click:Connect(function()
+            DeleteConfig()
+            SavedConfigsLabel.Text = "Saved: " .. GetSavedSlotsCount() .. "/" .. MaxConfigSlots
+        end)
+
+        return configFrame
+    end
+
+    -- BUILD TABS & SECTIONS
+    local combatTab = CreateTab("Combat", "🎯")
+    local aimSection = CreateSection(combatTab, "AIMBOT SETTINGS")
+    CreateToggle(aimSection, "Enable Aimbot", "AimEnabled")
+    CreateToggle(aimSection, "Legit Mode (Long Range)", "LegitMode")
+    CreateToggle(aimSection, "Sticky Lock", "StickyLock")
+    CreateAimPartSelector(aimSection)
+    CreateToggle(aimSection, "Wall Check", "WallCheck")
+    CreateSlider(aimSection, "Smoothness", 0.1, 1, "Smoothness", function(v) return string.format("%.2f", v) end)
+    CreateSlider(aimSection, "Max Distance", 100, 1000, "MaxDistance", function(v) return tostring(math.floor(v)) end)
+    CreateSlider(aimSection, "Prediction", 0, 0.5, "Prediction", function(v) return string.format("%.2f", v) end)
+
+    local highlightSection = CreateSection(combatTab, "TARGET HIGHLIGHT")
+    CreateToggle(highlightSection, "Enable Highlight", "HighlightEnabled")
+    CreateColorSlider(highlightSection, "Highlight Color", "HighlightColor", "RainbowHighlight")
+
+    local visualTab = CreateTab("Visuals", "👁")
+    local fovSection = CreateSection(visualTab, "FOV CIRCLE")
+    CreateToggle(fovSection, "Show FOV Circle", "ShowFOV")
+    CreateSlider(fovSection, "FOV Size", 50, 400, "FOV", function(v) return tostring(math.floor(v)) end)
+    CreateColorSlider(fovSection, "FOV Color", "FOVColor", "RainbowFOV")
+
+    local crosshairSection = CreateSection(visualTab, "CROSSHAIR")
+    CreateToggle(crosshairSection, "Show Crosshair", "ShowCrosshair")
+    CreateSlider(crosshairSection, "Crosshair Size", 8, 30, "CrosshairSize", function(v) return tostring(math.floor(v)) end)
+    CreateColorSlider(crosshairSection, "Crosshair Color", "CrosshairColor", "RainbowCrosshair")
+
+    local espTab = CreateTab("ESP", "📍")
+    local espMainSection = CreateSection(espTab, "ESP FEATURES")
+    CreateToggle(espMainSection, "Enable ESP", "ESPEnabled")
+    CreateToggle(espMainSection, "Team Check", "TeamCheck")
+    CreateToggle(espMainSection, "Show Names", "ESPNames")
+    CreateToggle(espMainSection, "Show Distance", "ESPDistance")
+    CreateToggle(espMainSection, "Show Health Bars", "ESPHealth")
+    CreateSlider(espMainSection, "ESP Transparency", 0, 1, "ESPTransparency", function(v) return string.format("%.2f", v) end)
+
+    local espColorSection = CreateSection(espTab, "ESP COLORS")
+    CreateColorSlider(espColorSection, "Highlight Color", "ESPColor", "RainbowESP")
+    CreateColorSlider(espColorSection, "Name Color", "ESPNameColor", nil)
+    CreateColorSlider(espColorSection, "Distance Color", "ESPDistanceColor", nil)
+    CreateColorSlider(espColorSection, "Health Color", "ESPHealthColor", nil)
+
+    local configTab = CreateTab("Config", "⚙")
+    local configSection = CreateSection(configTab, "CONFIG MANAGEMENT")
+    CreateConfigButtons(configSection)
+
+    -- TARGETING SYSTEM
+    local function GetRandomAimPart()
+        local parts = {"Head", "UpperTorso", "LowerTorso"}
+        RandomAimData.ShotCount = RandomAimData.ShotCount + 1
+        if RandomAimData.ShotCount >= RandomAimData.MaxShots then
+            RandomAimData.ShotCount = 0
+            RandomAimData.CurrentPart = "Head"
+            return "Head"
+        else
+            RandomAimData.CurrentPart = parts[math.random(1, #parts)]
+            return RandomAimData.CurrentPart
+        end
+    end
+
+    local function IsVisible(targetPart)
+        if not Config.WallCheck then return true end
+        local origin = Camera.CFrame.Position
+        local direction = (targetPart.Position - origin).Unit * Config.MaxDistance
+        local params = RaycastParams.new()
+        params.FilterDescendantsInstances = {LocalPlayer.Character}
+        params.FilterType = Enum.RaycastFilterType.Exclude
+        params.IgnoreWater = true
+        local result = Workspace:Raycast(origin, direction, params)
+        if result then return result.Instance:IsDescendantOf(targetPart.Parent) end
+        return true
+    end
+
+    local function GetBodyPart(char)
+        local aimPart = Config.AimPart
+        if aimPart == "Random" then aimPart = GetRandomAimPart() end
+        if aimPart == "Head" then return char:FindFirstChild("Head")
+        elseif aimPart == "Body" then return char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso") or char:FindFirstChild("HumanoidRootPart")
+        elseif aimPart == "Torso" then return char:FindFirstChild("LowerTorso") or char:FindFirstChild("Torso") or char:FindFirstChild("HumanoidRootPart")
+        else return char:FindFirstChild(aimPart) or char:FindFirstChild("Head") or char:FindFirstChild("HumanoidRootPart")
+        end
+    end
+
+    local function GetClosestTarget()
+        local viewportSize = Camera.ViewportSize
+        local center = Vector2.new(viewportSize.X / 2, viewportSize.Y / 2)
+        local closest = nil
+        local shortestDist = Config.FOV / 2
+        
+        for _, player in pairs(Players:GetPlayers()) do
+            if player == LocalPlayer then continue end
+            if Config.TeamCheck and player.Team and LocalPlayer.Team and player.Team == LocalPlayer.Team then continue end
+            local char = player.Character
+            if not char then continue end
+            local hum = char:FindFirstChild("Humanoid")
+            if not hum or hum.Health <= 0 then continue end
+            local part = GetBodyPart(char)
+            if not part then continue end
+            local dist = (part.Position - Camera.CFrame.Position).Magnitude
+            if dist > Config.MaxDistance then continue end
+            if not IsVisible(part) then continue end
+            local pos, onScreen = Camera:WorldToViewportPoint(part.Position)
+            if onScreen then
+                local screenDist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
+                if screenDist < shortestDist then
+                    shortestDist = screenDist
+                    closest = char
+                end
+            end
+        end
+        return closest
+    end
+
+    local stickyTarget = nil
+
+    -- MAIN AIM LOOP
+    RunService.Heartbeat:Connect(function()
+        if not Config.AimEnabled then
+            TargetHighlight.Enabled = false
+            stickyTarget = nil
+            return
+        end
+        
+        local target
+        
+        if Config.StickyLock and stickyTarget and stickyTarget.Parent then
+            local hum = stickyTarget:FindFirstChild("Humanoid")
+            if hum and hum.Health > 0 then
+                target = stickyTarget
+            else
+                stickyTarget = nil
+                target = GetClosestTarget()
+            end
+        else
+            target = GetClosestTarget()
+        end
+        
+        if target then
+            if Config.StickyLock and not stickyTarget then
+                stickyTarget = target
+            end
+            
+            if Config.HighlightEnabled then
+                TargetHighlight.Adornee = target
+                TargetHighlight.FillColor = RGBToColor3(Config.HighlightColor)
+                TargetHighlight.Enabled = true
+            else
+                TargetHighlight.Enabled = false
+            end
+            
+            local part = GetBodyPart(target)
+            if part then
+                local targetPos = part.Position
+                local hum = target:FindFirstChild("Humanoid")
+                if hum and Config.Prediction > 0 then
+                    targetPos = targetPos + (part.Velocity * Config.Prediction)
+                end
+                if part.Name == "Head" then
+                    targetPos = targetPos + Vector3.new(0, 0.05, 0)
+                end
+                
+                local smoothness = Config.Smoothness
+                
+                -- Legit Mode: Slower aim at long range
+                if Config.LegitMode then
+                    local distance = (Camera.CFrame.Position - targetPos).Magnitude
+                    if distance > 200 then
+                        smoothness = smoothness * 0.3 -- Much slower at long range
+                    end
+                end
+                
+                local goalCF = CFrame.new(Camera.CFrame.Position, targetPos)
+                Camera.CFrame = Camera.CFrame:Lerp(goalCF, smoothness)
+            end
+        else
+            TargetHighlight.Enabled = false
+            stickyTarget = nil
+        end
+    end)
+
+    local function animateLoading()
+        for i, step in ipairs(loadingSteps) do
+            LoadingStatus.Text = step.text
+            TweenService:Create(LoadingProgress, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Size = UDim2.new(step.progress, 0, 1, 0)}):Play()
+            wait(0.4)
+        end
+        
+        wait(0.3)
+        LoadingGui:Destroy()
+        
+        FOVCircle.Visible = Config.ShowFOV
+        Crosshair.Visible = Config.ShowCrosshair
+        HorizontalLine.Visible = Config.ShowCrosshair
+        VerticalLine.Visible = Config.ShowCrosshair
+    end
+
+    animateLoading()
+    MainFrame.Visible = true
+end
