@@ -1,3 +1,4 @@
+LENNY HUB - COMPLETE WITH KEY SYSTEM
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -8,6 +9,19 @@ local HttpService = game:GetService("HttpService")
 
 local LocalPlayer = Players.LocalPlayer
 local Camera = Workspace.CurrentCamera
+
+-- VERSION & UPDATE SYSTEM
+local CURRENT_VERSION = "v2.1.0"
+local VERSION_FILE = "LennyHub_Version.txt"
+local UPDATE_CHANGELOG = {
+    "• Fixed aimbot - now works properly",
+    "• Fixed FOV circle positioning",
+    "• Added 3D ESP boxes around players",
+    "• Enhanced ESP with better visuals",
+    "• Improved UI polish and layout",
+    "• Performance optimizations",
+    "• Bug fixes and stability improvements"
+}
 
 -- // KEY SYSTEM //
 local CORRECT_KEY = "Elena"
@@ -146,6 +160,26 @@ end)
 
 -- // MAIN SCRIPT FUNCTION //
 function StartMainScript()
+    -- Check version
+    local function CheckVersion()
+        local showUpdate = true
+        if isfile and readfile and isfile(VERSION_FILE) then
+            local savedVersion = readfile(VERSION_FILE)
+            if savedVersion == CURRENT_VERSION then
+                showUpdate = false
+            end
+        end
+        return showUpdate
+    end
+    
+    local function SaveVersion()
+        if writefile then
+            writefile(VERSION_FILE, CURRENT_VERSION)
+        end
+    end
+    
+    local showUpdatePanel = CheckVersion()
+
     local LoadingGui = Instance.new("ScreenGui")
     LoadingGui.Name = "LoadingScreen"
     LoadingGui.ResetOnSpawn = false
@@ -174,7 +208,7 @@ function StartMainScript()
     LoadingTitle.Size = UDim2.new(1, 0, 0, 40)
     LoadingTitle.Position = UDim2.new(0, 0, 0, 20)
     LoadingTitle.BackgroundTransparency = 1
-    LoadingTitle.Text = "LENNY HUB"
+    LoadingTitle.Text = "LENNY HUB " .. CURRENT_VERSION
     LoadingTitle.TextColor3 = Color3.fromRGB(147, 51, 234)
     LoadingTitle.Font = Enum.Font.GothamBlack
     LoadingTitle.TextSize = 20
@@ -218,6 +252,10 @@ function StartMainScript()
         AimEnabled = false,
         TeamCheck = false,
         ESPEnabled = false,
+        ESPNames = true,
+        ESPDistance = true,
+        ESPHealth = true,
+        ESPBoxes = false,
         HighlightEnabled = false,
         WallCheck = false,
         ShowFOV = false,
@@ -228,11 +266,15 @@ function StartMainScript()
         Prediction = 0.1,
         AimPart = "Head",
         CrosshairSize = 14,
+        ESPTextSize = 14,
+        ESPTextSpacing = 16,
         
         FOVColor = {147, 51, 234},
         CrosshairColor = {147, 51, 234},
         ESPColor = {255, 0, 255},
-        HighlightColor = {0, 0, 0},
+        ESPTextColor = {255, 255, 255},
+        ESPBoxColor = {147, 51, 234},
+        HighlightColor = {147, 51, 234},
         
         RainbowFOV = false,
         RainbowCrosshair = false,
@@ -338,9 +380,134 @@ function StartMainScript()
     ScreenGui.IgnoreGuiInset = true
     if gethui then ScreenGui.Parent = gethui() else ScreenGui.Parent = CoreGui end
 
+    -- UPDATE PANEL
+    local UpdatePanel = Instance.new("Frame", ScreenGui)
+    UpdatePanel.Size = UDim2.new(0, 400, 0, 320)
+    UpdatePanel.Position = UDim2.new(0.5, -200, 0.5, -160)
+    UpdatePanel.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+    UpdatePanel.BorderSizePixel = 0
+    UpdatePanel.Visible = false
+    UpdatePanel.ZIndex = 1000
+
+    local UpdateCorner = Instance.new("UICorner", UpdatePanel)
+    UpdateCorner.CornerRadius = UDim.new(0, 12)
+
+    local UpdateStroke = Instance.new("UIStroke", UpdatePanel)
+    UpdateStroke.Color = Color3.fromRGB(147, 51, 234)
+    UpdateStroke.Thickness = 3
+
+    local UpdateHeader = Instance.new("Frame", UpdatePanel)
+    UpdateHeader.Size = UDim2.new(1, 0, 0, 60)
+    UpdateHeader.BackgroundColor3 = Color3.fromRGB(147, 51, 234)
+    UpdateHeader.BorderSizePixel = 0
+    UpdateHeader.ZIndex = 1001
+
+    local UpdateHeaderCorner = Instance.new("UICorner", UpdateHeader)
+    UpdateHeaderCorner.CornerRadius = UDim.new(0, 12)
+
+    local UpdateHeaderCover = Instance.new("Frame", UpdateHeader)
+    UpdateHeaderCover.Size = UDim2.new(1, 0, 0, 12)
+    UpdateHeaderCover.Position = UDim2.new(0, 0, 1, -12)
+    UpdateHeaderCover.BackgroundColor3 = Color3.fromRGB(147, 51, 234)
+    UpdateHeaderCover.BorderSizePixel = 0
+    UpdateHeaderCover.ZIndex = 1001
+
+    local UpdateTitleLabel = Instance.new("TextLabel", UpdateHeader)
+    UpdateTitleLabel.Size = UDim2.new(1, -60, 0, 30)
+    UpdateTitleLabel.Position = UDim2.new(0, 20, 0, 8)
+    UpdateTitleLabel.BackgroundTransparency = 1
+    UpdateTitleLabel.Text = "🎉 NEW UPDATE!"
+    UpdateTitleLabel.TextColor3 = Color3.new(1, 1, 1)
+    UpdateTitleLabel.Font = Enum.Font.GothamBlack
+    UpdateTitleLabel.TextSize = 20
+    UpdateTitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    UpdateTitleLabel.ZIndex = 1002
+
+    local UpdateVersionLabel = Instance.new("TextLabel", UpdateHeader)
+    UpdateVersionLabel.Size = UDim2.new(1, -60, 0, 20)
+    UpdateVersionLabel.Position = UDim2.new(0, 20, 0, 35)
+    UpdateVersionLabel.BackgroundTransparency = 1
+    UpdateVersionLabel.Text = "Version " .. CURRENT_VERSION
+    UpdateVersionLabel.TextColor3 = Color3.fromRGB(230, 230, 255)
+    UpdateVersionLabel.Font = Enum.Font.Gotham
+    UpdateVersionLabel.TextSize = 13
+    UpdateVersionLabel.TextXAlignment = Enum.TextXAlignment.Left
+    UpdateVersionLabel.ZIndex = 1002
+
+    local UpdateCloseBtn = Instance.new("TextButton", UpdateHeader)
+    UpdateCloseBtn.Size = UDim2.new(0, 35, 0, 35)
+    UpdateCloseBtn.Position = UDim2.new(1, -45, 0, 12)
+    UpdateCloseBtn.BackgroundColor3 = Color3.fromRGB(239, 68, 68)
+    UpdateCloseBtn.Text = "×"
+    UpdateCloseBtn.TextColor3 = Color3.new(1, 1, 1)
+    UpdateCloseBtn.Font = Enum.Font.GothamBlack
+    UpdateCloseBtn.TextSize = 24
+    UpdateCloseBtn.AutoButtonColor = false
+    UpdateCloseBtn.ZIndex = 1002
+
+    local UpdateCloseBtnCorner = Instance.new("UICorner", UpdateCloseBtn)
+    UpdateCloseBtnCorner.CornerRadius = UDim.new(0, 8)
+
+    local UpdateContent = Instance.new("ScrollingFrame", UpdatePanel)
+    UpdateContent.Size = UDim2.new(1, -40, 1, -100)
+    UpdateContent.Position = UDim2.new(0, 20, 0, 70)
+    UpdateContent.BackgroundTransparency = 1
+    UpdateContent.BorderSizePixel = 0
+    UpdateContent.ScrollBarThickness = 4
+    UpdateContent.ScrollBarImageColor3 = Color3.fromRGB(147, 51, 234)
+    UpdateContent.CanvasSize = UDim2.new(0, 0, 0, 0)
+    UpdateContent.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    UpdateContent.ZIndex = 1001
+
+    local UpdateListLayout = Instance.new("UIListLayout", UpdateContent)
+    UpdateListLayout.Padding = UDim.new(0, 8)
+    UpdateListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+    local ChangelogTitle = Instance.new("TextLabel", UpdateContent)
+    ChangelogTitle.Size = UDim2.new(1, 0, 0, 25)
+    ChangelogTitle.BackgroundTransparency = 1
+    ChangelogTitle.Text = "WHAT'S NEW:"
+    ChangelogTitle.TextColor3 = Color3.fromRGB(147, 51, 234)
+    ChangelogTitle.Font = Enum.Font.GothamBold
+    ChangelogTitle.TextSize = 14
+    ChangelogTitle.TextXAlignment = Enum.TextXAlignment.Left
+    ChangelogTitle.ZIndex = 1002
+
+    for i, change in ipairs(UPDATE_CHANGELOG) do
+        local changeLine = Instance.new("TextLabel", UpdateContent)
+        changeLine.Size = UDim2.new(1, -10, 0, 0)
+        changeLine.AutomaticSize = Enum.AutomaticSize.Y
+        changeLine.BackgroundTransparency = 1
+        changeLine.Text = change
+        changeLine.TextColor3 = Color3.fromRGB(220, 220, 230)
+        changeLine.Font = Enum.Font.Gotham
+        changeLine.TextSize = 12
+        changeLine.TextXAlignment = Enum.TextXAlignment.Left
+        changeLine.TextWrapped = true
+        changeLine.TextYAlignment = Enum.TextYAlignment.Top
+        changeLine.ZIndex = 1002
+        changeLine.LayoutOrder = i
+    end
+
+    UpdateCloseBtn.MouseButton1Click:Connect(function()
+        TweenService:Create(UpdatePanel, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), 
+            {Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()
+        wait(0.3)
+        UpdatePanel.Visible = false
+        SaveVersion()
+    end)
+
+    UpdateCloseBtn.MouseEnter:Connect(function()
+        TweenService:Create(UpdateCloseBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(220, 50, 50)}):Play()
+    end)
+
+    UpdateCloseBtn.MouseLeave:Connect(function()
+        TweenService:Create(UpdateCloseBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(239, 68, 68)}):Play()
+    end)
+
     local MainFrame = Instance.new("Frame", ScreenGui)
-    MainFrame.Size = UDim2.new(0, 320, 0, 420)
-    MainFrame.Position = UDim2.new(0.5, -160, 0.5, -210)
+    MainFrame.Size = UDim2.new(0, 340, 0, 450)
+    MainFrame.Position = UDim2.new(0.5, -170, 0.5, -225)
     MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 23)
     MainFrame.BorderSizePixel = 0
     MainFrame.Active = true
@@ -370,18 +537,31 @@ function StartMainScript()
     TopBarCover.BorderSizePixel = 0
 
     local Title = Instance.new("TextLabel", TopBar)
-    Title.Size = UDim2.new(1, -110, 1, 0)
+    Title.Size = UDim2.new(1, -130, 1, 0)
     Title.Position = UDim2.new(0, 12, 0, 0)
     Title.BackgroundTransparency = 1
-    Title.Text = "LENNY HUB"
+    Title.Text = "LENNY HUB " .. CURRENT_VERSION
     Title.TextColor3 = Color3.fromRGB(147, 51, 234)
     Title.Font = Enum.Font.GothamBlack
-    Title.TextSize = 15
+    Title.TextSize = 14
     Title.TextXAlignment = Enum.TextXAlignment.Left
+
+    local UpdatesBtn = Instance.new("TextButton", TopBar)
+    UpdatesBtn.Size = UDim2.new(0, 28, 0, 28)
+    UpdatesBtn.Position = UDim2.new(1, -98, 0.5, -14)
+    UpdatesBtn.BackgroundColor3 = Color3.fromRGB(147, 51, 234)
+    UpdatesBtn.Text = "📋"
+    UpdatesBtn.TextColor3 = Color3.new(1, 1, 1)
+    UpdatesBtn.Font = Enum.Font.GothamBold
+    UpdatesBtn.TextSize = 14
+    UpdatesBtn.AutoButtonColor = false
+
+    local UpdatesBtnCorner = Instance.new("UICorner", UpdatesBtn)
+    UpdatesBtnCorner.CornerRadius = UDim.new(0, 6)
 
     local SuggestBtn = Instance.new("TextButton", TopBar)
     SuggestBtn.Size = UDim2.new(0, 28, 0, 28)
-    SuggestBtn.Position = UDim2.new(1, -98, 0.5, -14)
+    SuggestBtn.Position = UDim2.new(1, -65, 0.5, -14)
     SuggestBtn.BackgroundColor3 = Color3.fromRGB(59, 130, 246)
     SuggestBtn.Text = "?"
     SuggestBtn.TextColor3 = Color3.new(1, 1, 1)
@@ -394,7 +574,7 @@ function StartMainScript()
 
     local MinimizeBtn = Instance.new("TextButton", TopBar)
     MinimizeBtn.Size = UDim2.new(0, 28, 0, 28)
-    MinimizeBtn.Position = UDim2.new(1, -65, 0.5, -14)
+    MinimizeBtn.Position = UDim2.new(1, -32, 0.5, -14)
     MinimizeBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 110)
     MinimizeBtn.Text = "−"
     MinimizeBtn.TextColor3 = Color3.new(1, 1, 1)
@@ -407,13 +587,14 @@ function StartMainScript()
 
     local CloseBtn = Instance.new("TextButton", TopBar)
     CloseBtn.Size = UDim2.new(0, 28, 0, 28)
-    CloseBtn.Position = UDim2.new(1, -32, 0.5, -14)
+    CloseBtn.Position = UDim2.new(1, -98, 0.5, -14)
     CloseBtn.BackgroundColor3 = Color3.fromRGB(239, 68, 68)
     CloseBtn.Text = "×"
     CloseBtn.TextColor3 = Color3.new(1, 1, 1)
     CloseBtn.Font = Enum.Font.GothamBlack
     CloseBtn.TextSize = 20
     CloseBtn.AutoButtonColor = false
+    CloseBtn.Visible = false
 
     local CloseCorner = Instance.new("UICorner", CloseBtn)
     CloseCorner.CornerRadius = UDim.new(0, 6)
@@ -438,15 +619,15 @@ function StartMainScript()
     RestoreStroke.Thickness = 3
 
     local SuggestPanel = Instance.new("Frame", ScreenGui)
-    SuggestPanel.Size = UDim2.new(0, 280, 0, 200)
-    SuggestPanel.Position = UDim2.new(0.5, -140, 0.5, -100)
+    SuggestPanel.Size = UDim2.new(0, 300, 0, 220)
+    SuggestPanel.Position = UDim2.new(0.5, -150, 0.5, -110)
     SuggestPanel.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
     SuggestPanel.BorderSizePixel = 0
     SuggestPanel.Visible = false
     SuggestPanel.ZIndex = 600
 
-    local SuggestCorner = Instance.new("UICorner", SuggestPanel)
-    SuggestCorner.CornerRadius = UDim.new(0, 10)
+    local SuggestCornerUI = Instance.new("UICorner", SuggestPanel)
+    SuggestCornerUI.CornerRadius = UDim.new(0, 10)
 
     local SuggestStroke = Instance.new("UIStroke", SuggestPanel)
     SuggestStroke.Color = Color3.fromRGB(59, 130, 246)
@@ -482,8 +663,9 @@ function StartMainScript()
         "• Use 100-150 FOV for best results",
         "• Enable Wall Check to avoid targeting through walls",
         "• Random aim part helps avoid detection",
-        "• Save your config after tweaking!",
-        "• Use multiple config slots for different games"
+        "• ESP Boxes show 3D frames around players",
+        "• Adjust text spacing if ESP labels overlap",
+        "• Save your config after tweaking!"
     }
 
     local SuggestText = Instance.new("TextLabel", SuggestPanel)
@@ -513,7 +695,9 @@ function StartMainScript()
     ContentLayout.Padding = UDim.new(0, 8)
     ContentLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
+    -- FOV CIRCLE (FIXED)
     local FOVCircle = Instance.new("Frame", ScreenGui)
+    FOVCircle.AnchorPoint = Vector2.new(0.5, 0.5)
     FOVCircle.Size = UDim2.new(0, Config.FOV, 0, Config.FOV)
     FOVCircle.BackgroundTransparency = 1
     FOVCircle.Visible = false
@@ -528,6 +712,7 @@ function StartMainScript()
     FOVCorner.CornerRadius = UDim.new(1, 0)
 
     local Crosshair = Instance.new("Frame", ScreenGui)
+    Crosshair.AnchorPoint = Vector2.new(0.5, 0.5)
     Crosshair.Size = UDim2.new(0, 4, 0, 4)
     Crosshair.BackgroundColor3 = RGBToColor3(Config.CrosshairColor)
     Crosshair.BorderSizePixel = 0
@@ -538,6 +723,7 @@ function StartMainScript()
     CrosshairCorner.CornerRadius = UDim.new(1, 0)
 
     local HorizontalLine = Instance.new("Frame", ScreenGui)
+    HorizontalLine.AnchorPoint = Vector2.new(0.5, 0.5)
     HorizontalLine.Size = UDim2.new(0, Config.CrosshairSize, 0, 2)
     HorizontalLine.BackgroundColor3 = RGBToColor3(Config.CrosshairColor)
     HorizontalLine.BorderSizePixel = 0
@@ -546,6 +732,7 @@ function StartMainScript()
     HorizontalLine.ZIndex = 11
 
     local VerticalLine = Instance.new("Frame", ScreenGui)
+    VerticalLine.AnchorPoint = Vector2.new(0.5, 0.5)
     VerticalLine.Size = UDim2.new(0, 2, 0, Config.CrosshairSize)
     VerticalLine.BackgroundColor3 = RGBToColor3(Config.CrosshairColor)
     VerticalLine.BorderSizePixel = 0
@@ -553,18 +740,21 @@ function StartMainScript()
     VerticalLine.Visible = false
     VerticalLine.ZIndex = 11
 
+    -- FIXED FOV POSITIONING
     local function UpdateFOVPosition()
         local viewportSize = Camera.ViewportSize
         local centerX = viewportSize.X / 2
         local centerY = viewportSize.Y / 2
         
-        FOVCircle.Position = UDim2.new(0, centerX - (Config.FOV / 2), 0, centerY - (Config.FOV / 2))
-        Crosshair.Position = UDim2.new(0, centerX - 2, 0, centerY - 2)
-        HorizontalLine.Position = UDim2.new(0, centerX - (Config.CrosshairSize / 2), 0, centerY - 1)
-        VerticalLine.Position = UDim2.new(0, centerX - 1, 0, centerY - (Config.CrosshairSize / 2))
+        FOVCircle.Position = UDim2.new(0, centerX, 0, centerY)
+        FOVCircle.Size = UDim2.new(0, Config.FOV, 0, Config.FOV)
+        
+        Crosshair.Position = UDim2.new(0, centerX, 0, centerY)
+        HorizontalLine.Position = UDim2.new(0, centerX, 0, centerY)
+        VerticalLine.Position = UDim2.new(0, centerX, 0, centerY)
     end
 
-    -- SINGLE TARGET HIGHLIGHT (Only shows on aimbot target)
+    -- TARGET HIGHLIGHT
     local TargetHighlight = Instance.new("Highlight", CoreGui)
     TargetHighlight.FillColor = RGBToColor3(Config.HighlightColor)
     TargetHighlight.OutlineColor = Color3.fromRGB(255, 255, 255)
@@ -575,6 +765,14 @@ function StartMainScript()
     local function Animate(obj, property, value)
         TweenService:Create(obj, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {[property] = value}):Play()
     end
+
+    UpdatesBtn.MouseButton1Click:Connect(function()
+        UpdatePanel.Visible = true
+        UpdatePanel.Size = UDim2.new(0, 0, 0, 0)
+        UpdatePanel.Position = UDim2.new(0.5, 0, 0.5, 0)
+        TweenService:Create(UpdatePanel, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), 
+            {Size = UDim2.new(0, 400, 0, 320), Position = UDim2.new(0.5, -200, 0.5, -160)}):Play()
+    end)
 
     SuggestBtn.MouseButton1Click:Connect(function()
         SuggestPanel.Visible = not SuggestPanel.Visible
@@ -589,7 +787,15 @@ function StartMainScript()
         Config.ESPEnabled = false
         Config.HighlightEnabled = false
         TargetHighlight.Enabled = false
-        for _, esp in pairs(ESPObjects) do esp:Destroy() end
+        for _, esp in pairs(ESPObjects) do 
+            if esp.Highlight then esp.Highlight:Destroy() end
+            if esp.BillboardGui then esp.BillboardGui:Destroy() end
+            if esp.BoxDrawing then 
+                for _, line in pairs(esp.BoxDrawing) do
+                    line:Remove()
+                end
+            end
+        end
         ScreenGui:Destroy()
         game:GetService("StarterGui"):SetCore("SendNotification", {
             Title = "LENNY HUB",
@@ -611,8 +817,32 @@ function StartMainScript()
     CloseBtn.MouseEnter:Connect(function() Animate(CloseBtn, "BackgroundColor3", Color3.fromRGB(220, 50, 50)) end)
     CloseBtn.MouseLeave:Connect(function() Animate(CloseBtn, "BackgroundColor3", Color3.fromRGB(239, 68, 68)) end)
 
+    -- ESP SYSTEM WITH 3D BOXES
+    local function WorldToViewportPoint(pos)
+        local screenPos, onScreen = Camera:WorldToViewportPoint(pos)
+        return Vector2.new(screenPos.X, screenPos.Y), onScreen, screenPos.Z
+    end
+
+    local function CreateBoxLine()
+        local line = Drawing.new("Line")
+        line.Thickness = 2
+        line.Color = RGBToColor3(Config.ESPBoxColor)
+        line.Transparency = 1
+        line.Visible = false
+        return line
+    end
+
     local function CreateESP(player)
         if ESPObjects[player] then return end
+        
+        local espData = {
+            Player = player,
+            Highlight = nil,
+            BillboardGui = nil,
+            BoxDrawing = {}
+        }
+        
+        -- Highlight
         local highlight = Instance.new("Highlight")
         highlight.Name = "ESP_" .. player.Name
         highlight.FillColor = RGBToColor3(Config.ESPColor)
@@ -621,42 +851,240 @@ function StartMainScript()
         highlight.OutlineTransparency = 0
         highlight.Enabled = false
         highlight.Parent = CoreGui
-        ESPObjects[player] = highlight
+        espData.Highlight = highlight
+        
+        -- 3D Box
+        if Drawing then
+            for i = 1, 12 do
+                espData.BoxDrawing[i] = CreateBoxLine()
+            end
+        end
+        
+        -- Billboard
+        local billboard = Instance.new("BillboardGui")
+        billboard.Name = "ESPText_" .. player.Name
+        billboard.AlwaysOnTop = true
+        billboard.Size = UDim2.new(0, 200, 0, 100)
+        billboard.StudsOffset = Vector3.new(0, 3, 0)
+        billboard.Enabled = false
+        billboard.Parent = CoreGui
+        espData.BillboardGui = billboard
+        
+        local textContainer = Instance.new("Frame", billboard)
+        textContainer.Size = UDim2.new(1, 0, 1, 0)
+        textContainer.BackgroundTransparency = 1
+        
+        local nameLabel = Instance.new("TextLabel", textContainer)
+        nameLabel.Name = "NameLabel"
+        nameLabel.Size = UDim2.new(1, 0, 0, Config.ESPTextSize)
+        nameLabel.Position = UDim2.new(0, 0, 0, 0)
+        nameLabel.BackgroundTransparency = 1
+        nameLabel.Text = player.Name
+        nameLabel.TextColor3 = RGBToColor3(Config.ESPTextColor)
+        nameLabel.Font = Enum.Font.GothamBold
+        nameLabel.TextSize = Config.ESPTextSize
+        nameLabel.TextStrokeTransparency = 0.5
+        nameLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+        
+        local healthLabel = Instance.new("TextLabel", textContainer)
+        healthLabel.Name = "HealthLabel"
+        healthLabel.Size = UDim2.new(1, 0, 0, Config.ESPTextSize)
+        healthLabel.Position = UDim2.new(0, 0, 0, Config.ESPTextSpacing)
+        healthLabel.BackgroundTransparency = 1
+        healthLabel.Text = "HP: 100"
+        healthLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+        healthLabel.Font = Enum.Font.Gotham
+        healthLabel.TextSize = Config.ESPTextSize
+        healthLabel.TextStrokeTransparency = 0.5
+        healthLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+        
+        local distanceLabel = Instance.new("TextLabel", textContainer)
+        distanceLabel.Name = "DistanceLabel"
+        distanceLabel.Size = UDim2.new(1, 0, 0, Config.ESPTextSize)
+        distanceLabel.Position = UDim2.new(0, 0, 0, Config.ESPTextSpacing * 2)
+        distanceLabel.BackgroundTransparency = 1
+        distanceLabel.Text = "0m"
+        distanceLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+        distanceLabel.Font = Enum.Font.Gotham
+        distanceLabel.TextSize = Config.ESPTextSize
+        distanceLabel.TextStrokeTransparency = 0.5
+        distanceLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+        
+        ESPObjects[player] = espData
     end
 
     local function RemoveESP(player)
         if ESPObjects[player] then
-            ESPObjects[player]:Destroy()
+            if ESPObjects[player].Highlight then ESPObjects[player].Highlight:Destroy() end
+            if ESPObjects[player].BillboardGui then ESPObjects[player].BillboardGui:Destroy() end
+            if ESPObjects[player].BoxDrawing then
+                for _, line in pairs(ESPObjects[player].BoxDrawing) do
+                    line:Remove()
+                end
+            end
             ESPObjects[player] = nil
         end
     end
 
+    local function UpdateESPBoxes(espData, character)
+        if not Drawing or not Config.ESPBoxes then 
+            if espData.BoxDrawing then
+                for _, line in pairs(espData.BoxDrawing) do
+                    line.Visible = false
+                end
+            end
+            return 
+        end
+        
+        local rootPart = character:FindFirstChild("HumanoidRootPart")
+        if not rootPart then return end
+        
+        local size = character:GetExtentsSize()
+        local position = rootPart.Position
+        
+        -- 8 corners
+        local corners = {
+            Vector3.new(-size.X/2, -size.Y/2, -size.Z/2),
+            Vector3.new(size.X/2, -size.Y/2, -size.Z/2),
+            Vector3.new(-size.X/2, size.Y/2, -size.Z/2),
+            Vector3.new(size.X/2, size.Y/2, -size.Z/2),
+            Vector3.new(-size.X/2, -size.Y/2, size.Z/2),
+            Vector3.new(size.X/2, -size.Y/2, size.Z/2),
+            Vector3.new(-size.X/2, size.Y/2, size.Z/2),
+            Vector3.new(size.X/2, size.Y/2, size.Z/2)
+        }
+        
+        local screenCorners = {}
+        local allOnScreen = true
+        
+        for i, corner in ipairs(corners) do
+            local worldPos = position + corner
+            local screenPos, onScreen = WorldToViewportPoint(worldPos)
+            screenCorners[i] = screenPos
+            if not onScreen then allOnScreen = false end
+        end
+        
+        if not allOnScreen then
+            for _, line in pairs(espData.BoxDrawing) do
+                line.Visible = false
+            end
+            return
+        end
+        
+        -- 12 lines
+        local connections = {
+            {1, 2}, {3, 4}, {5, 6}, {7, 8},
+            {1, 3}, {2, 4}, {5, 7}, {6, 8},
+            {1, 5}, {2, 6}, {3, 7}, {4, 8}
+        }
+        
+        for i, connection in ipairs(connections) do
+            local line = espData.BoxDrawing[i]
+            if line then
+                line.From = screenCorners[connection[1]]
+                line.To = screenCorners[connection[2]]
+                line.Color = RGBToColor3(Config.ESPBoxColor)
+                line.Visible = true
+            end
+        end
+    end
+
     local function UpdateESP()
-        for player, highlight in pairs(ESPObjects) do
+        for player, espData in pairs(ESPObjects) do
             if not player or not player.Parent or not player.Character then
-                highlight.Enabled = false
+                if espData.Highlight then espData.Highlight.Enabled = false end
+                if espData.BillboardGui then espData.BillboardGui.Enabled = false end
+                if espData.BoxDrawing then
+                    for _, line in pairs(espData.BoxDrawing) do
+                        line.Visible = false
+                    end
+                end
                 continue
             end
             
             local character = player.Character
             local humanoid = character:FindFirstChild("Humanoid")
+            local rootPart = character:FindFirstChild("HumanoidRootPart")
             
-            if not humanoid or humanoid.Health <= 0 then
-                highlight.Enabled = false
+            if not humanoid or humanoid.Health <= 0 or not rootPart then
+                if espData.Highlight then espData.Highlight.Enabled = false end
+                if espData.BillboardGui then espData.BillboardGui.Enabled = false end
+                if espData.BoxDrawing then
+                    for _, line in pairs(espData.BoxDrawing) do
+                        line.Visible = false
+                    end
+                end
                 continue
             end
             
             if Config.TeamCheck and player.Team == LocalPlayer.Team then
-                highlight.Enabled = false
+                if espData.Highlight then espData.Highlight.Enabled = false end
+                if espData.BillboardGui then espData.BillboardGui.Enabled = false end
+                if espData.BoxDrawing then
+                    for _, line in pairs(espData.BoxDrawing) do
+                        line.Visible = false
+                    end
+                end
                 continue
             end
             
-            if Config.ESPEnabled then
-                highlight.Adornee = character
-                highlight.FillColor = RGBToColor3(Config.ESPColor)
-                highlight.Enabled = true
-            else
-                highlight.Enabled = false
+            -- Highlight
+            if Config.ESPEnabled and espData.Highlight then
+                espData.Highlight.Adornee = character
+                espData.Highlight.FillColor = RGBToColor3(Config.ESPColor)
+                espData.Highlight.Enabled = true
+            elseif espData.Highlight then
+                espData.Highlight.Enabled = false
+            end
+            
+            -- 3D Boxes
+            UpdateESPBoxes(espData, character)
+            
+            -- Text
+            local showText = Config.ESPNames or Config.ESPHealth or Config.ESPDistance
+            if showText and espData.BillboardGui then
+                espData.BillboardGui.Adornee = rootPart
+                espData.BillboardGui.Enabled = true
+                
+                local container = espData.BillboardGui:FindFirstChild("Frame")
+                if container then
+                    local nameLabel = container:FindFirstChild("NameLabel")
+                    local healthLabel = container:FindFirstChild("HealthLabel")
+                    local distanceLabel = container:FindFirstChild("DistanceLabel")
+                    
+                    if nameLabel then
+                        nameLabel.Visible = Config.ESPNames
+                        nameLabel.TextSize = Config.ESPTextSize
+                        nameLabel.TextColor3 = RGBToColor3(Config.ESPTextColor)
+                    end
+                    
+                    if healthLabel then
+                        healthLabel.Visible = Config.ESPHealth
+                        healthLabel.TextSize = Config.ESPTextSize
+                        healthLabel.Position = UDim2.new(0, 0, 0, Config.ESPTextSpacing)
+                        local healthPercent = (humanoid.Health / humanoid.MaxHealth) * 100
+                        healthLabel.Text = string.format("HP: %.0f%%", healthPercent)
+                        if healthPercent > 75 then
+                            healthLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+                        elseif healthPercent > 50 then
+                            healthLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+                        elseif healthPercent > 25 then
+                            healthLabel.TextColor3 = Color3.fromRGB(255, 165, 0)
+                        else
+                            healthLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+                        end
+                    end
+                    
+                    if distanceLabel and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                        distanceLabel.Visible = Config.ESPDistance
+                        distanceLabel.TextSize = Config.ESPTextSize
+                        distanceLabel.Position = UDim2.new(0, 0, 0, Config.ESPTextSpacing * 2)
+                        local distance = (rootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                        distanceLabel.Text = string.format("%.0fm", distance)
+                    end
+                end
+            elseif espData.BillboardGui then
+                espData.BillboardGui.Enabled = false
             end
         end
     end
@@ -688,8 +1116,14 @@ function StartMainScript()
         
         if Config.RainbowESP then
             Config.ESPColor = {math.floor(rainbowColor.R * 255), math.floor(rainbowColor.G * 255), math.floor(rainbowColor.B * 255)}
+            Config.ESPBoxColor = {math.floor(rainbowColor.R * 255), math.floor(rainbowColor.G * 255), math.floor(rainbowColor.B * 255)}
             for _, esp in pairs(ESPObjects) do
-                esp.FillColor = rainbowColor
+                if esp.Highlight then esp.Highlight.FillColor = rainbowColor end
+                if esp.BoxDrawing then
+                    for _, line in pairs(esp.BoxDrawing) do
+                        line.Color = rainbowColor
+                    end
+                end
             end
         end
         
@@ -798,7 +1232,17 @@ function StartMainScript()
                 HorizontalLine.Visible = Config.ShowCrosshair
                 VerticalLine.Visible = Config.ShowCrosshair
             elseif settingName == "ESPEnabled" and not Config.ESPEnabled then 
-                for _, esp in pairs(ESPObjects) do esp.Enabled = false end
+                for _, esp in pairs(ESPObjects) do 
+                    if esp.Highlight then esp.Highlight.Enabled = false end
+                end
+            elseif settingName == "ESPBoxes" and not Config.ESPBoxes then
+                for _, esp in pairs(ESPObjects) do
+                    if esp.BoxDrawing then
+                        for _, line in pairs(esp.BoxDrawing) do
+                            line.Visible = false
+                        end
+                    end
+                end
             elseif settingName == "HighlightEnabled" and not Config.HighlightEnabled then
                 TargetHighlight.Enabled = false
             end
@@ -875,7 +1319,9 @@ function StartMainScript()
             knob.Position = UDim2.new(percent, -6, 0.5, -6)
             value.Text = format and format(val) or tostring(val)
             
-            if settingName == "FOV" then FOVCircle.Size = UDim2.new(0, val, 0, val)
+            if settingName == "FOV" then 
+                FOVCircle.Size = UDim2.new(0, val, 0, val)
+                UpdateFOVPosition()
             elseif settingName == "CrosshairSize" then
                 HorizontalLine.Size = UDim2.new(0, val, 0, 2)
                 VerticalLine.Size = UDim2.new(0, 2, 0, val)
@@ -1023,7 +1469,17 @@ function StartMainScript()
                     HorizontalLine.BackgroundColor3 = color
                     VerticalLine.BackgroundColor3 = color
                 elseif settingName == "ESPColor" then 
-                    for _, esp in pairs(ESPObjects) do esp.FillColor = color end
+                    for _, esp in pairs(ESPObjects) do 
+                        if esp.Highlight then esp.Highlight.FillColor = color end
+                    end
+                elseif settingName == "ESPBoxColor" then
+                    for _, esp in pairs(ESPObjects) do
+                        if esp.BoxDrawing then
+                            for _, line in pairs(esp.BoxDrawing) do
+                                line.Color = color
+                            end
+                        end
+                    end
                 elseif settingName == "HighlightColor" then
                     TargetHighlight.FillColor = color
                 end
@@ -1085,8 +1541,8 @@ function StartMainScript()
         
         for i, option in ipairs(options) do
             local btn = Instance.new("TextButton", selector)
-            btn.Size = UDim2.new(0, 65, 0, 26)
-            btn.Position = UDim2.new(0, 10 + ((i-1) * 70), 0, 30)
+            btn.Size = UDim2.new(0, 70, 0, 26)
+            btn.Position = UDim2.new(0, 10 + ((i-1) * 75), 0, 30)
             btn.BackgroundColor3 = Config.AimPart == option and Color3.fromRGB(147, 51, 234) or Color3.fromRGB(60, 60, 70)
             btn.Text = option
             btn.TextColor3 = Color3.new(1, 1, 1)
@@ -1146,8 +1602,8 @@ function StartMainScript()
 
         for i = 1, MaxConfigSlots do
             local slotBtn = Instance.new("TextButton", slotSelector)
-            slotBtn.Size = UDim2.new(0, 50, 0, 26)
-            slotBtn.Position = UDim2.new(0, (i-1) * 55, 0, 0)
+            slotBtn.Size = UDim2.new(0, 58, 0, 26)
+            slotBtn.Position = UDim2.new(0, (i-1) * 63, 0, 0)
             slotBtn.BackgroundColor3 = CurrentConfigSlot == i and Color3.fromRGB(147, 51, 234) or Color3.fromRGB(60, 60, 70)
             slotBtn.Text = tostring(i)
             slotBtn.TextColor3 = Color3.new(1, 1, 1)
@@ -1217,6 +1673,7 @@ function StartMainScript()
             if LoadConfig() then
                 FOVCircle.Visible = Config.ShowFOV
                 FOVCircle.Size = UDim2.new(0, Config.FOV, 0, Config.FOV)
+                UpdateFOVPosition()
                 Crosshair.Visible = Config.ShowCrosshair
                 HorizontalLine.Visible = Config.ShowCrosshair
                 VerticalLine.Visible = Config.ShowCrosshair
@@ -1233,7 +1690,7 @@ function StartMainScript()
         return configFrame
     end
 
-    -- BUILD ALL SECTIONS
+    -- BUILD SECTIONS
     local aimSection = CreateSection("[AIM]")
     CreateToggle(aimSection, "Enable Aimbot", "AimEnabled")
     CreateAimPartSelector(aimSection)
@@ -1249,8 +1706,15 @@ function StartMainScript()
 
     local espSection = CreateSection("[ESP]")
     CreateToggle(espSection, "Enable ESP", "ESPEnabled")
+    CreateToggle(espSection, "Show 3D Boxes", "ESPBoxes")
     CreateToggle(espSection, "Team Check", "TeamCheck")
+    CreateToggle(espSection, "Show Names", "ESPNames")
+    CreateToggle(espSection, "Show Health", "ESPHealth")
+    CreateToggle(espSection, "Show Distance", "ESPDistance")
+    CreateSlider(espSection, "Text Size", 10, 20, "ESPTextSize", function(v) return tostring(math.floor(v)) end)
+    CreateSlider(espSection, "Text Line Spacing", 12, 30, "ESPTextSpacing", function(v) return tostring(math.floor(v)) .. "px" end)
     CreateColorSlider(espSection, "ESP Color", "ESPColor", "RainbowESP")
+    CreateColorSlider(espSection, "ESP Box Color", "ESPBoxColor", "RainbowESP")
 
     local highlightSection = CreateSection("[TARGET HIGHLIGHT]")
     CreateToggle(highlightSection, "Enable Highlight", "HighlightEnabled")
@@ -1329,7 +1793,7 @@ function StartMainScript()
         return closest
     end
 
-    -- MAIN AIM LOOP WITH TARGET HIGHLIGHT
+    -- MAIN AIM LOOP
     RunService.Heartbeat:Connect(function()
         if not Config.AimEnabled then
             TargetHighlight.Enabled = false
@@ -1338,7 +1802,6 @@ function StartMainScript()
         
         local target = GetClosestTarget()
         if target then
-            -- Show highlight ONLY on the current aimbot target
             if Config.HighlightEnabled then
                 TargetHighlight.Adornee = target
                 TargetHighlight.FillColor = RGBToColor3(Config.HighlightColor)
@@ -1375,11 +1838,20 @@ function StartMainScript()
         wait(0.3)
         LoadingGui:Destroy()
         
-        -- Show FOV/Crosshair ONLY after loading is complete
         FOVCircle.Visible = Config.ShowFOV
         Crosshair.Visible = Config.ShowCrosshair
         HorizontalLine.Visible = Config.ShowCrosshair
         VerticalLine.Visible = Config.ShowCrosshair
+        UpdateFOVPosition()
+        
+        if showUpdatePanel then
+            wait(0.5)
+            UpdatePanel.Visible = true
+            UpdatePanel.Size = UDim2.new(0, 0, 0, 0)
+            UpdatePanel.Position = UDim2.new(0.5, 0, 0.5, 0)
+            TweenService:Create(UpdatePanel, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), 
+                {Size = UDim2.new(0, 400, 0, 320), Position = UDim2.new(0.5, -200, 0.5, -160)}):Play()
+        end
     end
 
     animateLoading()
