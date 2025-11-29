@@ -1,0 +1,2315 @@
+-- LENNY HUB - COMPLETE WITH CUSTOMIZATION SYSTEM (FIXED & CLEANED)
+
+local Players        = game:GetService("Players")
+local RunService     = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local CoreGui        = game:GetService("CoreGui")
+local Workspace      = game:GetService("Workspace")
+local TweenService   = game:GetService("TweenService")
+local HttpService    = game:GetService("HttpService")
+
+local LocalPlayer    = Players.LocalPlayer
+local Camera         = Workspace.CurrentCamera
+
+---------------------------------------------------------------------
+-- DEVICE DETECTION
+---------------------------------------------------------------------
+
+local IsMobile = false
+if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
+    IsMobile = true
+end
+
+---------------------------------------------------------------------
+-- VERSION & UPDATE SYSTEM
+---------------------------------------------------------------------
+
+local CURRENT_VERSION   = "v2.2.0_fixed"
+local VERSION_FILE      = "LennyHub_Version.txt"
+local UPDATE_CHANGELOG  = {
+    "• Added UI Customization settings",
+    "• Device detection (Mobile/PC)",
+    "• Customizable theme colors",
+    "• Proper minimize/dock button",
+    "• Highlight independent of aimbot",
+    "• UIScale now works without breaking layout",
+    "• ESP boxes now stable 2D rectangles (no triangle bug)",
+    "• Fixed sliders for decimal values (smoothness, prediction, etc.)",
+}
+
+---------------------------------------------------------------------
+-- KEY SYSTEM
+---------------------------------------------------------------------
+
+local CORRECT_KEY   = "Elena"
+local KeyAuthorized = false
+
+local KeyGui = Instance.new("ScreenGui")
+KeyGui.Name = "KeySystem"
+KeyGui.ResetOnSpawn = false
+KeyGui.IgnoreGuiInset = true
+if gethui then KeyGui.Parent = gethui() else KeyGui.Parent = CoreGui end
+
+local KeyBg = Instance.new("Frame", KeyGui)
+KeyBg.Size = UDim2.new(1, 0, 1, 0)
+KeyBg.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
+KeyBg.BackgroundTransparency = 0.3
+KeyBg.BorderSizePixel = 0
+
+local KeyFrame = Instance.new("Frame", KeyBg)
+KeyFrame.Size = UDim2.new(0, 350, 0, 200)
+KeyFrame.Position = UDim2.new(0.5, -175, 0.5, -100)
+KeyFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+KeyFrame.BorderSizePixel = 0
+
+local KeyFrameCorner = Instance.new("UICorner", KeyFrame)
+KeyFrameCorner.CornerRadius = UDim.new(0, 12)
+
+local KeyFrameStroke = Instance.new("UIStroke", KeyFrame)
+KeyFrameStroke.Color = Color3.fromRGB(147, 51, 234)
+KeyFrameStroke.Thickness = 2
+
+local KeyTitle = Instance.new("TextLabel", KeyFrame)
+KeyTitle.Size = UDim2.new(1, 0, 0, 50)
+KeyTitle.BackgroundTransparency = 1
+KeyTitle.Text = "LENNY HUB - KEY SYSTEM"
+KeyTitle.TextColor3 = Color3.fromRGB(147, 51, 234)
+KeyTitle.Font = Enum.Font.GothamBlack
+KeyTitle.TextSize = 18
+
+local KeySubtitle = Instance.new("TextLabel", KeyFrame)
+KeySubtitle.Size = UDim2.new(1, -40, 0, 20)
+KeySubtitle.Position = UDim2.new(0, 20, 0, 55)
+KeySubtitle.BackgroundTransparency = 1
+KeySubtitle.Text = "Enter the key to continue"
+KeySubtitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+KeySubtitle.Font = Enum.Font.Gotham
+KeySubtitle.TextSize = 12
+
+local KeyInput = Instance.new("TextBox", KeyFrame)
+KeyInput.Size = UDim2.new(1, -40, 0, 40)
+KeyInput.Position = UDim2.new(0, 20, 0, 85)
+KeyInput.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+KeyInput.BorderSizePixel = 0
+KeyInput.PlaceholderText = "Enter Key..."
+KeyInput.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
+KeyInput.Text = ""
+KeyInput.TextColor3 = Color3.new(1, 1, 1)
+KeyInput.Font = Enum.Font.Gotham
+KeyInput.TextSize = 14
+KeyInput.ClearTextOnFocus = false
+
+local KeyInputCorner = Instance.new("UICorner", KeyInput)
+KeyInputCorner.CornerRadius = UDim.new(0, 8)
+
+local KeyInputStroke = Instance.new("UIStroke", KeyInput)
+KeyInputStroke.Color = Color3.fromRGB(147, 51, 234)
+KeyInputStroke.Thickness = 1
+KeyInputStroke.Transparency = 0.5
+
+local SubmitBtn = Instance.new("TextButton", KeyFrame)
+SubmitBtn.Size = UDim2.new(1, -40, 0, 40)
+SubmitBtn.Position = UDim2.new(0, 20, 0, 140)
+SubmitBtn.BackgroundColor3 = Color3.fromRGB(147, 51, 234)
+SubmitBtn.Text = "SUBMIT"
+SubmitBtn.TextColor3 = Color3.new(1, 1, 1)
+SubmitBtn.Font = Enum.Font.GothamBold
+SubmitBtn.TextSize = 14
+SubmitBtn.AutoButtonColor = false
+
+local SubmitCorner = Instance.new("UICorner", SubmitBtn)
+SubmitCorner.CornerRadius = UDim.new(0, 8)
+
+local StatusLabel = Instance.new("TextLabel", KeyFrame)
+StatusLabel.Size = UDim2.new(1, -40, 0, 20)
+StatusLabel.Position = UDim2.new(0, 20, 0, 185)
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.Text = ""
+StatusLabel.TextColor3 = Color3.fromRGB(239, 68, 68)
+StatusLabel.Font = Enum.Font.Gotham
+StatusLabel.TextSize = 11
+StatusLabel.Visible = false
+
+---------------------------------------------------------------------
+-- FORWARD DECLARATION
+---------------------------------------------------------------------
+local function StartMainScript() end
+
+---------------------------------------------------------------------
+-- KEY VALIDATION
+---------------------------------------------------------------------
+
+local function ValidateKey()
+    local enteredKey = KeyInput.Text
+    
+    if enteredKey == CORRECT_KEY then
+        StatusLabel.TextColor3 = Color3.fromRGB(34, 197, 94)
+        StatusLabel.Text = "Key Accepted! Loading..."
+        StatusLabel.Visible = true
+        SubmitBtn.BackgroundColor3 = Color3.fromRGB(34, 197, 94)
+        
+        task.wait(1)
+        KeyAuthorized = true
+        KeyGui:Destroy()
+        StartMainScript()
+    else
+        StatusLabel.TextColor3 = Color3.fromRGB(239, 68, 68)
+        StatusLabel.Text = "Invalid Key! Try again."
+        StatusLabel.Visible = true
+        SubmitBtn.BackgroundColor3 = Color3.fromRGB(239, 68, 68)
+        
+        TweenService:Create(
+            KeyFrame,
+            TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, 0, true),
+            {Position = UDim2.new(0.5, -165, 0.5, -100)}
+        ):Play()
+        
+        task.wait(0.2)
+        KeyFrame.Position = UDim2.new(0.5, -175, 0.5, -100)
+        SubmitBtn.BackgroundColor3 = Color3.fromRGB(147, 51, 234)
+        
+        task.wait(2)
+        StatusLabel.Visible = false
+        KeyInput.Text = ""
+    end
+end
+
+SubmitBtn.MouseButton1Click:Connect(ValidateKey)
+KeyInput.FocusLost:Connect(function(enterPressed)
+    if enterPressed then ValidateKey() end
+end)
+
+SubmitBtn.MouseEnter:Connect(function()
+    TweenService:Create(SubmitBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(170, 70, 255)}):Play()
+end)
+
+SubmitBtn.MouseLeave:Connect(function()
+    TweenService:Create(SubmitBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(147, 51, 234)}):Play()
+end)
+
+---------------------------------------------------------------------
+-- MAIN SCRIPT
+---------------------------------------------------------------------
+
+function StartMainScript()
+    -----------------------------------------------------------------
+    -- VERSION CHECK HELPERS
+    -----------------------------------------------------------------
+    local function CheckVersion()
+        local showUpdate = true
+        if isfile and readfile and isfile(VERSION_FILE) then
+            local savedVersion = readfile(VERSION_FILE)
+            if savedVersion == CURRENT_VERSION then
+                showUpdate = false
+            end
+        end
+        return showUpdate
+    end
+    
+    local function SaveVersion()
+        if writefile then
+            writefile(VERSION_FILE, CURRENT_VERSION)
+        end
+    end
+    
+    local showUpdatePanel = CheckVersion()
+
+    -----------------------------------------------------------------
+    -- LOADING SCREEN
+    -----------------------------------------------------------------
+    local LoadingGui = Instance.new("ScreenGui")
+    LoadingGui.Name = "LoadingScreen"
+    LoadingGui.ResetOnSpawn = false
+    LoadingGui.IgnoreGuiInset = true
+    if gethui then LoadingGui.Parent = gethui() else LoadingGui.Parent = CoreGui end
+
+    local LoadingBg = Instance.new("Frame", LoadingGui)
+    LoadingBg.Size = UDim2.new(1, 0, 1, 0)
+    LoadingBg.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
+    LoadingBg.BorderSizePixel = 0
+
+    local LoadingFrame = Instance.new("Frame", LoadingBg)
+    LoadingFrame.Size = UDim2.new(0, 300, 0, 150)
+    LoadingFrame.Position = UDim2.new(0.5, -150, 0.5, -75)
+    LoadingFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    LoadingFrame.BorderSizePixel = 0
+
+    local LoadingCorner = Instance.new("UICorner", LoadingFrame)
+    LoadingCorner.CornerRadius = UDim.new(0, 12)
+
+    local LoadingStroke = Instance.new("UIStroke", LoadingFrame)
+    LoadingStroke.Color = Color3.fromRGB(147, 51, 234)
+    LoadingStroke.Thickness = 2
+
+    local LoadingTitle = Instance.new("TextLabel", LoadingFrame)
+    LoadingTitle.Size = UDim2.new(1, 0, 0, 40)
+    LoadingTitle.Position = UDim2.new(0, 0, 0, 20)
+    LoadingTitle.BackgroundTransparency = 1
+    LoadingTitle.Text = "LENNY HUB " .. CURRENT_VERSION
+    LoadingTitle.TextColor3 = Color3.fromRGB(147, 51, 234)
+    LoadingTitle.Font = Enum.Font.GothamBlack
+    LoadingTitle.TextSize = 20
+
+    local DeviceLabel = Instance.new("TextLabel", LoadingFrame)
+    DeviceLabel.Size = UDim2.new(1, 0, 0, 20)
+    DeviceLabel.Position = UDim2.new(0, 0, 0, 55)
+    DeviceLabel.BackgroundTransparency = 1
+    DeviceLabel.Text = IsMobile and "📱 Mobile Device Detected" or "🖥️ PC Device Detected"
+    DeviceLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
+    DeviceLabel.Font = Enum.Font.GothamBold
+    DeviceLabel.TextSize = 11
+
+    local LoadingStatus = Instance.new("TextLabel", LoadingFrame)
+    LoadingStatus.Size = UDim2.new(1, -40, 0, 20)
+    LoadingStatus.Position = UDim2.new(0, 20, 0, 80)
+    LoadingStatus.BackgroundTransparency = 1
+    LoadingStatus.Text = "Initializing..."
+    LoadingStatus.TextColor3 = Color3.fromRGB(200, 200, 200)
+    LoadingStatus.Font = Enum.Font.Gotham
+    LoadingStatus.TextSize = 12
+
+    local LoadingBar = Instance.new("Frame", LoadingFrame)
+    LoadingBar.Size = UDim2.new(0.85, 0, 0, 6)
+    LoadingBar.Position = UDim2.new(0.075, 0, 0, 115)
+    LoadingBar.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+    LoadingBar.BorderSizePixel = 0
+
+    local LoadingBarCorner = Instance.new("UICorner", LoadingBar)
+    LoadingBarCorner.CornerRadius = UDim.new(1, 0)
+
+    local LoadingProgress = Instance.new("Frame", LoadingBar)
+    LoadingProgress.Size = UDim2.new(0, 0, 1, 0)
+    LoadingProgress.BackgroundColor3 = Color3.fromRGB(147, 51, 234)
+    LoadingProgress.BorderSizePixel = 0
+
+    local LoadingProgressCorner = Instance.new("UICorner", LoadingProgress)
+    LoadingProgressCorner.CornerRadius = UDim.new(1, 0)
+
+    local loadingSteps = {
+        {text = "Initializing...",               progress = 0.1},
+        {text = "Loading UI components...",      progress = 0.3},
+        {text = "Setting up aim system...",      progress = 0.5},
+        {text = "Configuring ESP...",            progress = 0.7},
+        {text = "Loading saved config...",       progress = 0.9},
+        {text = "Complete!",                     progress = 1.0},
+    }
+
+    -----------------------------------------------------------------
+    -- CONFIG
+    -----------------------------------------------------------------
+    local DefaultConfig = {
+        AimEnabled = false,
+        TeamCheck = false,
+        ESPEnabled = false,
+        ESPNames = true,
+        ESPDistance = true,
+        ESPHealth = true,
+        ESPBoxes = false,
+        HighlightEnabled = false,
+        WallCheck = false,
+        ShowFOV = false,
+        ShowCrosshair = false,
+        FOV = 120,
+        Smoothness = 0.25,
+        MaxDistance = 500,
+        Prediction = 0.1,
+        AimPart = "Head",
+        CrosshairSize = 14,
+        ESPTextSize = 14,
+        ESPTextSpacing = 16,
+        
+        -- UI CUSTOMIZATION
+        ThemeColor      = {147, 51, 234},
+        BackgroundColor = {18, 18, 23},
+        SectionColor    = {28, 28, 35},
+        UITransparency  = 0,
+        UIScale         = 1,
+        
+        FOVColor        = {147, 51, 234},
+        CrosshairColor  = {147, 51, 234},
+        ESPColor        = {255, 0, 255},
+        ESPTextColor    = {255, 255, 255},
+        ESPBoxColor     = {147, 51, 234},
+        HighlightColor  = {147, 51, 234},
+        
+        RainbowFOV      = false,
+        RainbowCrosshair= false,
+        RainbowESP      = false,
+        RainbowHighlight= false,
+        RainbowTheme    = false,
+    }
+
+    local Config = {}
+    for k, v in pairs(DefaultConfig) do
+        if type(v) == "table" then
+            Config[k] = {v[1], v[2], v[3]}
+        else
+            Config[k] = v
+        end
+    end
+
+    local function RGBToColor3(rgb)
+        return Color3.fromRGB(rgb[1], rgb[2], rgb[3])
+    end
+
+    local RandomAimData = {ShotCount = 0, MaxShots = 5, CurrentPart = "Head"}
+    local ESPObjects = {}
+    local CurrentConfigSlot = 1
+    local MaxConfigSlots    = 5
+    local ConfigFilePrefix  = "LennyHub_Config_Slot_"
+    local RainbowHue        = 0
+
+    local function GetConfigFileName()
+        return ConfigFilePrefix .. tostring(CurrentConfigSlot) .. ".json"
+    end
+
+    local function SaveConfig()
+        pcall(function()
+            local fileName = GetConfigFileName()
+            writefile(fileName, HttpService:JSONEncode(Config))
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "LENNY HUB",
+                Text = "Config saved to Slot " .. CurrentConfigSlot .. "!",
+                Duration = 3
+            })
+        end)
+    end
+
+    local function LoadConfig()
+        local success = pcall(function()
+            local fileName = GetConfigFileName()
+            if isfile and isfile(fileName) then
+                local loadedConfig = HttpService:JSONDecode(readfile(fileName))
+                for key, value in pairs(loadedConfig) do
+                    if Config[key] ~= nil then
+                        Config[key] = value
+                    end
+                end
+                game:GetService("StarterGui"):SetCore("SendNotification", {
+                    Title = "LENNY HUB",
+                    Text = "Config loaded from Slot " .. CurrentConfigSlot .. "!",
+                    Duration = 3
+                })
+                return true
+            else
+                game:GetService("StarterGui"):SetCore("SendNotification", {
+                    Title = "LENNY HUB",
+                    Text = "No config found in Slot " .. CurrentConfigSlot,
+                    Duration = 3
+                })
+            end
+        end)
+        return success
+    end
+
+    local function DeleteConfig()
+        pcall(function()
+            local fileName = GetConfigFileName()
+            if isfile and isfile(fileName) then
+                delfile(fileName)
+                game:GetService("StarterGui"):SetCore("SendNotification", {
+                    Title = "LENNY HUB",
+                    Text = "Config deleted from Slot " .. CurrentConfigSlot .. "!",
+                    Duration = 3
+                })
+            else
+                game:GetService("StarterGui"):SetCore("SendNotification", {
+                    Title = "LENNY HUB",
+                    Text = "No config to delete in Slot " .. CurrentConfigSlot,
+                    Duration = 3
+                })
+            end
+        end)
+    end
+
+    local function GetSavedSlotsCount()
+        local count = 0
+        for i = 1, MaxConfigSlots do
+            local fileName = ConfigFilePrefix .. tostring(i) .. ".json"
+            if isfile and isfile(fileName) then
+                count = count + 1
+            end
+        end
+        return count
+    end
+
+    -----------------------------------------------------------------
+    -- MAIN GUI
+    -----------------------------------------------------------------
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "LennyHub"
+    ScreenGui.ResetOnSpawn = false
+    ScreenGui.IgnoreGuiInset = true
+    if gethui then ScreenGui.Parent = gethui() else ScreenGui.Parent = CoreGui end
+
+    -----------------------------------------------------------------
+    -- EXIT CONFIRMATION PANEL
+    -----------------------------------------------------------------
+    local ExitPanel = Instance.new("Frame", ScreenGui)
+    ExitPanel.Size = UDim2.new(0, 350, 0, 180)
+    ExitPanel.Position = UDim2.new(0.5, -175, 0.5, -90)
+    ExitPanel.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    ExitPanel.BorderSizePixel = 0
+    ExitPanel.Visible = false
+    ExitPanel.ZIndex = 2000
+
+    local ExitCorner = Instance.new("UICorner", ExitPanel)
+    ExitCorner.CornerRadius = UDim.new(0, 12)
+
+    local ExitStroke = Instance.new("UIStroke", ExitPanel)
+    ExitStroke.Color = Color3.fromRGB(239, 68, 68)
+    ExitStroke.Thickness = 3
+
+    local ExitIcon = Instance.new("TextLabel", ExitPanel)
+    ExitIcon.Size = UDim2.new(1, 0, 0, 50)
+    ExitIcon.Position = UDim2.new(0, 0, 0, 15)
+    ExitIcon.BackgroundTransparency = 1
+    ExitIcon.Text = "👋"
+    ExitIcon.TextColor3 = Color3.fromRGB(255, 200, 100)
+    ExitIcon.Font = Enum.Font.GothamBlack
+    ExitIcon.TextSize = 40
+    ExitIcon.ZIndex = 2001
+
+    local ExitTitle = Instance.new("TextLabel", ExitPanel)
+    ExitTitle.Size = UDim2.new(1, -40, 0, 30)
+    ExitTitle.Position = UDim2.new(0, 20, 0, 70)
+    ExitTitle.BackgroundTransparency = 1
+    ExitTitle.Text = "Thank you for using Lenny Hub!"
+    ExitTitle.TextColor3 = Color3.new(1, 1, 1)
+    ExitTitle.Font = Enum.Font.GothamBold
+    ExitTitle.TextSize = 16
+    ExitTitle.TextWrapped = true
+    ExitTitle.ZIndex = 2001
+
+    local ExitMessage = Instance.new("TextLabel", ExitPanel)
+    ExitMessage.Size = UDim2.new(1, -40, 0, 25)
+    ExitMessage.Position = UDim2.new(0, 20, 0, 100)
+    ExitMessage.BackgroundTransparency = 1
+    ExitMessage.Text = "See you next time!"
+    ExitMessage.TextColor3 = Color3.fromRGB(200, 200, 200)
+    ExitMessage.Font = Enum.Font.Gotham
+    ExitMessage.TextSize = 13
+    ExitMessage.ZIndex = 2001
+
+    local ExitConfirmBtn = Instance.new("TextButton", ExitPanel)
+    ExitConfirmBtn.Size = UDim2.new(0, 140, 0, 35)
+    ExitConfirmBtn.Position = UDim2.new(0.5, -145, 0, 135)
+    ExitConfirmBtn.BackgroundColor3 = Color3.fromRGB(239, 68, 68)
+    ExitConfirmBtn.Text = "Yes, Exit"
+    ExitConfirmBtn.TextColor3 = Color3.new(1, 1, 1)
+    ExitConfirmBtn.Font = Enum.Font.GothamBold
+    ExitConfirmBtn.TextSize = 13
+    ExitConfirmBtn.AutoButtonColor = false
+    ExitConfirmBtn.ZIndex = 2001
+
+    local ExitConfirmCorner = Instance.new("UICorner", ExitConfirmBtn)
+    ExitConfirmCorner.CornerRadius = UDim.new(0, 8)
+
+    local ExitCancelBtn = Instance.new("TextButton", ExitPanel)
+    ExitCancelBtn.Size = UDim2.new(0, 140, 0, 35)
+    ExitCancelBtn.Position = UDim2.new(0.5, 5, 0, 135)
+    ExitCancelBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 110)
+    ExitCancelBtn.Text = "Cancel"
+    ExitCancelBtn.TextColor3 = Color3.new(1, 1, 1)
+    ExitCancelBtn.Font = Enum.Font.GothamBold
+    ExitCancelBtn.TextSize = 13
+    ExitCancelBtn.AutoButtonColor = false
+    ExitCancelBtn.ZIndex = 2001
+
+    local ExitCancelCorner = Instance.new("UICorner", ExitCancelBtn)
+    ExitCancelCorner.CornerRadius = UDim.new(0, 8)
+
+    -----------------------------------------------------------------
+    -- UPDATE PANEL
+    -----------------------------------------------------------------
+    local UpdatePanel = Instance.new("Frame", ScreenGui)
+    UpdatePanel.Size = UDim2.new(0, 400, 0, 320)
+    UpdatePanel.Position = UDim2.new(0.5, -200, 0.5, -160)
+    UpdatePanel.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+    UpdatePanel.BorderSizePixel = 0
+    UpdatePanel.Visible = false
+    UpdatePanel.ZIndex = 1000
+
+    local UpdateCorner = Instance.new("UICorner", UpdatePanel)
+    UpdateCorner.CornerRadius = UDim.new(0, 12)
+
+    local UpdateStroke = Instance.new("UIStroke", UpdatePanel)
+    UpdateStroke.Color = Color3.fromRGB(147, 51, 234)
+    UpdateStroke.Thickness = 3
+
+    local UpdateHeader = Instance.new("Frame", UpdatePanel)
+    UpdateHeader.Size = UDim2.new(1, 0, 0, 60)
+    UpdateHeader.BackgroundColor3 = Color3.fromRGB(147, 51, 234)
+    UpdateHeader.BorderSizePixel = 0
+    UpdateHeader.ZIndex = 1001
+
+    local UpdateHeaderCorner = Instance.new("UICorner", UpdateHeader)
+    UpdateHeaderCorner.CornerRadius = UDim.new(0, 12)
+
+    local UpdateHeaderCover = Instance.new("Frame", UpdateHeader)
+    UpdateHeaderCover.Size = UDim2.new(1, 0, 0, 12)
+    UpdateHeaderCover.Position = UDim2.new(0, 0, 1, -12)
+    UpdateHeaderCover.BackgroundColor3 = Color3.fromRGB(147, 51, 234)
+    UpdateHeaderCover.BorderSizePixel = 0
+    UpdateHeaderCover.ZIndex = 1001
+
+    local UpdateTitleLabel = Instance.new("TextLabel", UpdateHeader)
+    UpdateTitleLabel.Size = UDim2.new(1, -60, 0, 30)
+    UpdateTitleLabel.Position = UDim2.new(0, 20, 0, 8)
+    UpdateTitleLabel.BackgroundTransparency = 1
+    UpdateTitleLabel.Text = "🎉 NEW UPDATE!"
+    UpdateTitleLabel.TextColor3 = Color3.new(1, 1, 1)
+    UpdateTitleLabel.Font = Enum.Font.GothamBlack
+    UpdateTitleLabel.TextSize = 20
+    UpdateTitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    UpdateTitleLabel.ZIndex = 1002
+
+    local UpdateVersionLabel = Instance.new("TextLabel", UpdateHeader)
+    UpdateVersionLabel.Size = UDim2.new(1, -60, 0, 20)
+    UpdateVersionLabel.Position = UDim2.new(0, 20, 0, 35)
+    UpdateVersionLabel.BackgroundTransparency = 1
+    UpdateVersionLabel.Text = "Version " .. CURRENT_VERSION
+    UpdateVersionLabel.TextColor3 = Color3.fromRGB(230, 230, 255)
+    UpdateVersionLabel.Font = Enum.Font.Gotham
+    UpdateVersionLabel.TextSize = 13
+    UpdateVersionLabel.TextXAlignment = Enum.TextXAlignment.Left
+    UpdateVersionLabel.ZIndex = 1002
+
+    local UpdateCloseBtn = Instance.new("TextButton", UpdateHeader)
+    UpdateCloseBtn.Size = UDim2.new(0, 35, 0, 35)
+    UpdateCloseBtn.Position = UDim2.new(1, -45, 0, 12)
+    UpdateCloseBtn.BackgroundColor3 = Color3.fromRGB(239, 68, 68)
+    UpdateCloseBtn.Text = "×"
+    UpdateCloseBtn.TextColor3 = Color3.new(1, 1, 1)
+    UpdateCloseBtn.Font = Enum.Font.GothamBlack
+    UpdateCloseBtn.TextSize = 24
+    UpdateCloseBtn.AutoButtonColor = false
+    UpdateCloseBtn.ZIndex = 1002
+
+    local UpdateCloseBtnCorner = Instance.new("UICorner", UpdateCloseBtn)
+    UpdateCloseBtnCorner.CornerRadius = UDim.new(0, 8)
+
+    local UpdateContent = Instance.new("ScrollingFrame", UpdatePanel)
+    UpdateContent.Size = UDim2.new(1, -40, 1, -100)
+    UpdateContent.Position = UDim2.new(0, 20, 0, 70)
+    UpdateContent.BackgroundTransparency = 1
+    UpdateContent.BorderSizePixel = 0
+    UpdateContent.ScrollBarThickness = 4
+    UpdateContent.ScrollBarImageColor3 = Color3.fromRGB(147, 51, 234)
+    UpdateContent.CanvasSize = UDim2.new(0, 0, 0, 0)
+    UpdateContent.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    UpdateContent.ZIndex = 1001
+
+    local UpdateListLayout = Instance.new("UIListLayout", UpdateContent)
+    UpdateListLayout.Padding = UDim.new(0, 8)
+    UpdateListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+    local ChangelogTitle = Instance.new("TextLabel", UpdateContent)
+    ChangelogTitle.Size = UDim2.new(1, 0, 0, 25)
+    ChangelogTitle.BackgroundTransparency = 1
+    ChangelogTitle.Text = "WHAT'S NEW:"
+    ChangelogTitle.TextColor3 = Color3.fromRGB(147, 51, 234)
+    ChangelogTitle.Font = Enum.Font.GothamBold
+    ChangelogTitle.TextSize = 14
+    ChangelogTitle.TextXAlignment = Enum.TextXAlignment.Left
+    ChangelogTitle.ZIndex = 1002
+
+    for i, change in ipairs(UPDATE_CHANGELOG) do
+        local changeLine = Instance.new("TextLabel", UpdateContent)
+        changeLine.Size = UDim2.new(1, -10, 0, 0)
+        changeLine.AutomaticSize = Enum.AutomaticSize.Y
+        changeLine.BackgroundTransparency = 1
+        changeLine.Text = change
+        changeLine.TextColor3 = Color3.fromRGB(220, 220, 230)
+        changeLine.Font = Enum.Font.Gotham
+        changeLine.TextSize = 12
+        changeLine.TextXAlignment = Enum.TextXAlignment.Left
+        changeLine.TextWrapped = true
+        changeLine.TextYAlignment = Enum.TextYAlignment.Top
+        changeLine.ZIndex = 1002
+        changeLine.LayoutOrder = i
+    end
+
+    -----------------------------------------------------------------
+    -- MAIN FRAME + TOP BAR + UISCALE
+    -----------------------------------------------------------------
+    local MainFrame = Instance.new("Frame", ScreenGui)
+    MainFrame.Size = UDim2.new(0, IsMobile and 320 or 340, 0, IsMobile and 400 or 450)
+    MainFrame.Position = UDim2.new(0.5, IsMobile and -160 or -170, 0.5, IsMobile and -200 or -225)
+    MainFrame.BackgroundColor3 = RGBToColor3(Config.BackgroundColor)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Active = true
+    MainFrame.Draggable = true
+    MainFrame.Visible = false
+    MainFrame.ClipsDescendants = true
+    MainFrame.BackgroundTransparency = Config.UITransparency
+
+    local MainCorner = Instance.new("UICorner", MainFrame)
+    MainCorner.CornerRadius = UDim.new(0, 10)
+
+    local MainStroke = Instance.new("UIStroke", MainFrame)
+    MainStroke.Color = RGBToColor3(Config.ThemeColor)
+    MainStroke.Thickness = 2
+
+    -- UIScale object so scaling doesn't break layout
+    local UIScaleObj = Instance.new("UIScale")
+    UIScaleObj.Parent = MainFrame
+    UIScaleObj.Scale = Config.UIScale
+
+    local TopBar = Instance.new("Frame", MainFrame)
+    TopBar.Size = UDim2.new(1, 0, 0, 42)
+    TopBar.BackgroundColor3 = RGBToColor3(Config.SectionColor)
+    TopBar.BorderSizePixel = 0
+
+    local TopBarCorner = Instance.new("UICorner", TopBar)
+    TopBarCorner.CornerRadius = UDim.new(0, 10)
+
+    local TopBarCover = Instance.new("Frame", TopBar)
+    TopBarCover.Size = UDim2.new(1, 0, 0, 12)
+    TopBarCover.Position = UDim2.new(0, 0, 1, -12)
+    TopBarCover.BackgroundColor3 = RGBToColor3(Config.SectionColor)
+    TopBarCover.BorderSizePixel = 0
+
+    local Title = Instance.new("TextLabel", TopBar)
+    Title.Size = UDim2.new(1, -160, 1, 0)
+    Title.Position = UDim2.new(0, 12, 0, 0)
+    Title.BackgroundTransparency = 1
+    Title.Text = "LENNY HUB " .. CURRENT_VERSION
+    Title.TextColor3 = RGBToColor3(Config.ThemeColor)
+    Title.Font = Enum.Font.GothamBlack
+    Title.TextSize = IsMobile and 12 or 14
+    Title.TextXAlignment = Enum.TextXAlignment.Left
+
+    -- Update log button
+    local UpdatesBtn = Instance.new("TextButton", TopBar)
+    UpdatesBtn.Size = UDim2.new(0, 28, 0, 28)
+    UpdatesBtn.Position = UDim2.new(1, -131, 0.5, -14)
+    UpdatesBtn.BackgroundColor3 = RGBToColor3(Config.ThemeColor)
+    UpdatesBtn.Text = "📋"
+    UpdatesBtn.TextColor3 = Color3.new(1, 1, 1)
+    UpdatesBtn.Font = Enum.Font.GothamBold
+    UpdatesBtn.TextSize = 14
+    UpdatesBtn.AutoButtonColor = false
+    local UpdatesBtnCorner = Instance.new("UICorner", UpdatesBtn)
+    UpdatesBtnCorner.CornerRadius = UDim.new(0, 6)
+
+    -- Pro tips button
+    local SuggestBtn = Instance.new("TextButton", TopBar)
+    SuggestBtn.Size = UDim2.new(0, 28, 0, 28)
+    SuggestBtn.Position = UDim2.new(1, -98, 0.5, -14)
+    SuggestBtn.BackgroundColor3 = Color3.fromRGB(59, 130, 246)
+    SuggestBtn.Text = "?"
+    SuggestBtn.TextColor3 = Color3.new(1, 1, 1)
+    SuggestBtn.Font = Enum.Font.GothamBold
+    SuggestBtn.TextSize = 16
+    SuggestBtn.AutoButtonColor = false
+    local SuggestCorner = Instance.new("UICorner", SuggestBtn)
+    SuggestCorner.CornerRadius = UDim.new(0, 6)
+
+    -- Minimize button (top bar)
+    local MinimizeTopBtn = Instance.new("TextButton", TopBar)
+    MinimizeTopBtn.Size = UDim2.new(0, 28, 0, 28)
+    MinimizeTopBtn.Position = UDim2.new(1, -65, 0.5, -14)
+    MinimizeTopBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 110)
+    MinimizeTopBtn.Text = "-"
+    MinimizeTopBtn.TextColor3 = Color3.new(1, 1, 1)
+    MinimizeTopBtn.Font = Enum.Font.GothamBold
+    MinimizeTopBtn.TextSize = 16
+    MinimizeTopBtn.AutoButtonColor = false
+    local MinimizeTopCorner = Instance.new("UICorner", MinimizeTopBtn)
+    MinimizeTopCorner.CornerRadius = UDim.new(0, 6)
+
+    -- Close button (opens exit confirmation)
+    local CloseBtn = Instance.new("TextButton", TopBar)
+    CloseBtn.Size = UDim2.new(0, 28, 0, 28)
+    CloseBtn.Position = UDim2.new(1, -32, 0.5, -14)
+    CloseBtn.BackgroundColor3 = Color3.fromRGB(239, 68, 68)
+    CloseBtn.Text = "×"
+    CloseBtn.TextColor3 = Color3.new(1, 1, 1)
+    CloseBtn.Font = Enum.Font.GothamBlack
+    CloseBtn.TextSize = 20
+    CloseBtn.AutoButtonColor = false
+    local CloseCorner = Instance.new("UICorner", CloseBtn)
+    CloseCorner.CornerRadius = UDim.new(0, 6)
+
+    -- Dock button (when minimized)
+    local MinimizeBtn = Instance.new("TextButton", ScreenGui)
+    MinimizeBtn.Size = UDim2.new(0, 50, 0, 50)
+    MinimizeBtn.Position = UDim2.new(0, 20, 0.5, -25)
+    MinimizeBtn.BackgroundColor3 = RGBToColor3(Config.ThemeColor)
+    MinimizeBtn.Text = "L"
+    MinimizeBtn.TextColor3 = Color3.new(1, 1, 1)
+    MinimizeBtn.Font = Enum.Font.GothamBlack
+    MinimizeBtn.TextSize = 26
+    MinimizeBtn.Visible = false
+    MinimizeBtn.AutoButtonColor = false
+    MinimizeBtn.ZIndex = 500
+
+    local MinimizeCorner = Instance.new("UICorner", MinimizeBtn)
+    MinimizeCorner.CornerRadius = UDim.new(1, 0)
+
+    local MinimizeStroke = Instance.new("UIStroke", MinimizeBtn)
+    MinimizeStroke.Color = RGBToColor3(Config.ThemeColor)
+    MinimizeStroke.Thickness = 3
+
+    -----------------------------------------------------------------
+    -- SUGGESTION PANEL
+    -----------------------------------------------------------------
+    local SuggestPanel = Instance.new("Frame", ScreenGui)
+    SuggestPanel.Size = UDim2.new(0, 300, 0, 220)
+    SuggestPanel.Position = UDim2.new(0.5, -150, 0.5, -110)
+    SuggestPanel.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    SuggestPanel.BorderSizePixel = 0
+    SuggestPanel.Visible = false
+    SuggestPanel.ZIndex = 600
+
+    local SuggestCornerUI = Instance.new("UICorner", SuggestPanel)
+    SuggestCornerUI.CornerRadius = UDim.new(0, 10)
+
+    local SuggestStrokeUI = Instance.new("UIStroke", SuggestPanel)
+    SuggestStrokeUI.Color = Color3.fromRGB(59, 130, 246)
+    SuggestStrokeUI.Thickness = 2
+
+    local SuggestTitle = Instance.new("TextLabel", SuggestPanel)
+    SuggestTitle.Size = UDim2.new(1, -40, 0, 35)
+    SuggestTitle.Position = UDim2.new(0, 15, 0, 10)
+    SuggestTitle.BackgroundTransparency = 1
+    SuggestTitle.Text = "💡 PRO TIPS"
+    SuggestTitle.TextColor3 = Color3.fromRGB(59, 130, 246)
+    SuggestTitle.Font = Enum.Font.GothamBold
+    SuggestTitle.TextSize = 16
+    SuggestTitle.TextXAlignment = Enum.TextXAlignment.Left
+    SuggestTitle.ZIndex = 601
+
+    local SuggestClose = Instance.new("TextButton", SuggestPanel)
+    SuggestClose.Size = UDim2.new(0, 25, 0, 25)
+    SuggestClose.Position = UDim2.new(1, -30, 0, 10)
+    SuggestClose.BackgroundColor3 = Color3.fromRGB(239, 68, 68)
+    SuggestClose.Text = "×"
+    SuggestClose.TextColor3 = Color3.new(1, 1, 1)
+    SuggestClose.Font = Enum.Font.GothamBold
+    SuggestClose.TextSize = 16
+    SuggestClose.AutoButtonColor = false
+    SuggestClose.ZIndex = 601
+
+    local SuggestCloseCorner = Instance.new("UICorner", SuggestClose)
+    SuggestCloseCorner.CornerRadius = UDim.new(0, 5)
+
+    local tips = {
+        "• Lower smoothness = More legit aim",
+        "• Use 100-150 FOV for best results",
+        "• Enable Wall Check to avoid targeting through walls",
+        "• Random aim part helps avoid detection",
+        "• ESP Boxes show frames around players",
+        "• Customize UI colors in Settings section",
+        "• Save your config after tweaking!"
+    }
+
+    local SuggestText = Instance.new("TextLabel", SuggestPanel)
+    SuggestText.Size = UDim2.new(1, -30, 1, -55)
+    SuggestText.Position = UDim2.new(0, 15, 0, 45)
+    SuggestText.BackgroundTransparency = 1
+    SuggestText.Text = table.concat(tips, "\n")
+    SuggestText.TextColor3 = Color3.fromRGB(200, 200, 200)
+    SuggestText.Font = Enum.Font.Gotham
+    SuggestText.TextSize = 11
+    SuggestText.TextXAlignment = Enum.TextXAlignment.Left
+    SuggestText.TextYAlignment = Enum.TextYAlignment.Top
+    SuggestText.TextWrapped = true
+    SuggestText.ZIndex = 601
+
+    -----------------------------------------------------------------
+    -- MAIN CONTENT SCROLL
+    -----------------------------------------------------------------
+    local Content = Instance.new("ScrollingFrame", MainFrame)
+    Content.Size = UDim2.new(1, -16, 1, -52)
+    Content.Position = UDim2.new(0, 8, 0, 46)
+    Content.BackgroundTransparency = 1
+    Content.BorderSizePixel = 0
+    Content.ScrollBarThickness = 3
+    Content.ScrollBarImageColor3 = RGBToColor3(Config.ThemeColor)
+    Content.CanvasSize = UDim2.new(0, 0, 0, 0)
+    Content.AutomaticCanvasSize = Enum.AutomaticSize.Y
+
+    local ContentLayout = Instance.new("UIListLayout", Content)
+    ContentLayout.Padding = UDim.new(0, 8)
+    ContentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+    -----------------------------------------------------------------
+    -- FOV & CROSSHAIR
+    -----------------------------------------------------------------
+    local FOVCircle = Instance.new("Frame", ScreenGui)
+    FOVCircle.AnchorPoint = Vector2.new(0.5, 0.5)
+    FOVCircle.Size = UDim2.new(0, Config.FOV, 0, Config.FOV)
+    FOVCircle.BackgroundTransparency = 1
+    FOVCircle.Visible = false
+    FOVCircle.ZIndex = 10
+
+    local FOVStroke = Instance.new("UIStroke", FOVCircle)
+    FOVStroke.Color = RGBToColor3(Config.FOVColor)
+    FOVStroke.Thickness = 2
+    FOVStroke.Transparency = 0.3
+
+    local FOVCorner = Instance.new("UICorner", FOVCircle)
+    FOVCorner.CornerRadius = UDim.new(1, 0)
+
+    local Crosshair = Instance.new("Frame", ScreenGui)
+    Crosshair.AnchorPoint = Vector2.new(0.5, 0.5)
+    Crosshair.Size = UDim2.new(0, 4, 0, 4)
+    Crosshair.BackgroundColor3 = RGBToColor3(Config.CrosshairColor)
+    Crosshair.BorderSizePixel = 0
+    Crosshair.Visible = false
+    Crosshair.ZIndex = 11
+
+    local CrosshairCorner = Instance.new("UICorner", Crosshair)
+    CrosshairCorner.CornerRadius = UDim.new(1, 0)
+
+    local HorizontalLine = Instance.new("Frame", ScreenGui)
+    HorizontalLine.AnchorPoint = Vector2.new(0.5, 0.5)
+    HorizontalLine.Size = UDim2.new(0, Config.CrosshairSize, 0, 2)
+    HorizontalLine.BackgroundColor3 = RGBToColor3(Config.CrosshairColor)
+    HorizontalLine.BorderSizePixel = 0
+    HorizontalLine.BackgroundTransparency = 0.3
+    HorizontalLine.Visible = false
+    HorizontalLine.ZIndex = 11
+
+    local VerticalLine = Instance.new("Frame", ScreenGui)
+    VerticalLine.AnchorPoint = Vector2.new(0.5, 0.5)
+    VerticalLine.Size = UDim2.new(0, 2, 0, Config.CrosshairSize)
+    VerticalLine.BackgroundColor3 = RGBToColor3(Config.CrosshairColor)
+    VerticalLine.BorderSizePixel = 0
+    VerticalLine.BackgroundTransparency = 0.3
+    VerticalLine.Visible = false
+    VerticalLine.ZIndex = 11
+
+    local function UpdateFOVPosition()
+        local viewportSize = Camera.ViewportSize
+        local centerX = viewportSize.X / 2
+        local centerY = viewportSize.Y / 2
+        
+        FOVCircle.Position = UDim2.new(0, centerX, 0, centerY)
+        FOVCircle.Size = UDim2.new(0, Config.FOV, 0, Config.FOV)
+        
+        Crosshair.Position = UDim2.new(0, centerX, 0, centerY)
+        HorizontalLine.Position = UDim2.new(0, centerX, 0, centerY)
+        VerticalLine.Position = UDim2.new(0, centerX, 0, centerY)
+    end
+
+    -----------------------------------------------------------------
+    -- TARGET HIGHLIGHT
+    -----------------------------------------------------------------
+    local TargetHighlight = Instance.new("Highlight", CoreGui)
+    TargetHighlight.FillColor = RGBToColor3(Config.HighlightColor)
+    TargetHighlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+    TargetHighlight.FillTransparency = 0.5
+    TargetHighlight.OutlineTransparency = 0
+    TargetHighlight.Enabled = false
+
+    local function Animate(obj, property, value)
+        TweenService:Create(obj, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {[property] = value}):Play()
+    end
+
+    -----------------------------------------------------------------
+    -- UI THEME UPDATE
+    -----------------------------------------------------------------
+    local function UpdateUITheme()
+        MainFrame.BackgroundColor3 = RGBToColor3(Config.BackgroundColor)
+        MainFrame.BackgroundTransparency = Config.UITransparency
+        MainStroke.Color = RGBToColor3(Config.ThemeColor)
+        TopBar.BackgroundColor3 = RGBToColor3(Config.SectionColor)
+        TopBarCover.BackgroundColor3 = RGBToColor3(Config.SectionColor)
+        Title.TextColor3 = RGBToColor3(Config.ThemeColor)
+        UpdatesBtn.BackgroundColor3 = RGBToColor3(Config.ThemeColor)
+
+        MinimizeTopBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 110)
+        MinimizeBtn.BackgroundColor3 = RGBToColor3(Config.ThemeColor)
+        MinimizeStroke.Color = RGBToColor3(Config.ThemeColor)
+
+        Content.ScrollBarImageColor3 = RGBToColor3(Config.ThemeColor)
+        
+        for _, section in pairs(Content:GetChildren()) do
+            if section:IsA("Frame") and section.Name ~= "UIListLayout" and section.Name ~= "UIPadding" then
+                section.BackgroundColor3 = RGBToColor3(Config.SectionColor)
+            end
+        end
+    end
+
+    -----------------------------------------------------------------
+    -- BUTTON CONNECTIONS (TOPBAR / EXIT / MINIMIZE / SUGGEST / UPDATE)
+    -----------------------------------------------------------------
+    UpdatesBtn.MouseButton1Click:Connect(function()
+        UpdatePanel.Visible = true
+        UpdatePanel.Size = UDim2.new(0, 0, 0, 0)
+        UpdatePanel.Position = UDim2.new(0.5, 0, 0.5, 0)
+        TweenService:Create(
+            UpdatePanel,
+            TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+            {Size = UDim2.new(0, 400, 0, 320), Position = UDim2.new(0.5, -200, 0.5, -160)}
+        ):Play()
+    end)
+
+    UpdateCloseBtn.MouseButton1Click:Connect(function()
+        TweenService:Create(
+            UpdatePanel,
+            TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In),
+            {Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0.5, 0, 0.5, 0)}
+        ):Play()
+        task.wait(0.3)
+        UpdatePanel.Visible = false
+        SaveVersion()
+    end)
+
+    UpdateCloseBtn.MouseEnter:Connect(function()
+        Animate(UpdateCloseBtn, "BackgroundColor3", Color3.fromRGB(220, 50, 50))
+    end)
+    UpdateCloseBtn.MouseLeave:Connect(function()
+        Animate(UpdateCloseBtn, "BackgroundColor3", Color3.fromRGB(239, 68, 68))
+    end)
+
+    SuggestBtn.MouseButton1Click:Connect(function()
+        SuggestPanel.Visible = not SuggestPanel.Visible
+    end)
+
+    SuggestClose.MouseButton1Click:Connect(function()
+        SuggestPanel.Visible = false
+    end)
+
+    CloseBtn.MouseButton1Click:Connect(function()
+        ExitPanel.Visible = true
+        ExitPanel.Size = UDim2.new(0, 0, 0, 0)
+        ExitPanel.Position = UDim2.new(0.5, 0, 0.5, 0)
+        TweenService:Create(
+            ExitPanel,
+            TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+            {Size = UDim2.new(0, 350, 0, 180), Position = UDim2.new(0.5, -175, 0.5, -90)}
+        ):Play()
+    end)
+
+    ExitConfirmBtn.MouseButton1Click:Connect(function()
+        Config.AimEnabled = false
+        Config.ESPEnabled = false
+        Config.HighlightEnabled = false
+        TargetHighlight.Enabled = false
+
+        for _, esp in pairs(ESPObjects) do 
+            if esp.Highlight then esp.Highlight:Destroy() end
+            if esp.BillboardGui then esp.BillboardGui:Destroy() end
+            if esp.BoxDrawing then 
+                for _, line in pairs(esp.BoxDrawing) do
+                    line:Remove()
+                end
+            end
+        end
+        
+        TweenService:Create(ExitPanel, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(ExitIcon, TweenInfo.new(0.3), {TextTransparency = 1}):Play()
+        TweenService:Create(ExitTitle, TweenInfo.new(0.3), {TextTransparency = 1}):Play()
+        TweenService:Create(ExitMessage, TweenInfo.new(0.3), {TextTransparency = 1}):Play()
+        
+        task.wait(0.5)
+        ScreenGui:Destroy()
+    end)
+
+    ExitCancelBtn.MouseButton1Click:Connect(function()
+        TweenService:Create(
+            ExitPanel,
+            TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In),
+            {Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0.5, 0, 0.5, 0)}
+        ):Play()
+        task.wait(0.3)
+        ExitPanel.Visible = false
+    end)
+
+    ExitConfirmBtn.MouseEnter:Connect(function()
+        Animate(ExitConfirmBtn, "BackgroundColor3", Color3.fromRGB(220, 50, 50))
+    end)
+    ExitConfirmBtn.MouseLeave:Connect(function()
+        Animate(ExitConfirmBtn, "BackgroundColor3", Color3.fromRGB(239, 68, 68))
+    end)
+    ExitCancelBtn.MouseEnter:Connect(function()
+        Animate(ExitCancelBtn, "BackgroundColor3", Color3.fromRGB(120, 120, 130))
+    end)
+    ExitCancelBtn.MouseLeave:Connect(function()
+        Animate(ExitCancelBtn, "BackgroundColor3", Color3.fromRGB(100, 100, 110))
+    end)
+
+    CloseBtn.MouseEnter:Connect(function()
+        Animate(CloseBtn, "BackgroundColor3", Color3.fromRGB(220, 50, 50))
+    end)
+    CloseBtn.MouseLeave:Connect(function()
+        Animate(CloseBtn, "BackgroundColor3", Color3.fromRGB(239, 68, 68))
+    end)
+
+    -- Top bar minimize → hide main frame, show dock
+    MinimizeTopBtn.MouseButton1Click:Connect(function()
+        MainFrame.Visible = false
+        MinimizeBtn.Visible = true
+    end)
+
+    -- Dock button → show main frame, hide dock
+    MinimizeBtn.MouseButton1Click:Connect(function()
+        MainFrame.Visible = true
+        MinimizeBtn.Visible = false
+    end)
+
+    MinimizeTopBtn.MouseEnter:Connect(function()
+        Animate(MinimizeTopBtn, "BackgroundColor3", Color3.fromRGB(120, 120, 130))
+    end)
+    MinimizeTopBtn.MouseLeave:Connect(function()
+        Animate(MinimizeTopBtn, "BackgroundColor3", Color3.fromRGB(100, 100, 110))
+    end)
+
+    -----------------------------------------------------------------
+    -- ESP SYSTEM
+    -----------------------------------------------------------------
+    local function WorldToViewportPoint(pos)
+        local screenPos, onScreen = Camera:WorldToViewportPoint(pos)
+        return Vector2.new(screenPos.X, screenPos.Y), onScreen, screenPos.Z
+    end
+
+    local function CreateBoxLine()
+        local line = Drawing.new("Line")
+        line.Thickness = 2
+        line.Color = RGBToColor3(Config.ESPBoxColor)
+        line.Transparency = 1
+        line.Visible = false
+        return line
+    end
+
+    local function CreateESP(player)
+        if ESPObjects[player] then return end
+        
+        local espData = {
+            Player = player,
+            Highlight = nil,
+            BillboardGui = nil,
+            BoxDrawing = {}
+        }
+        
+        -- Highlight
+        local highlight = Instance.new("Highlight")
+        highlight.Name = "ESP_" .. player.Name
+        highlight.FillColor = RGBToColor3(Config.ESPColor)
+        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+        highlight.FillTransparency = 0.4
+        highlight.OutlineTransparency = 0
+        highlight.Enabled = false
+        highlight.Parent = CoreGui
+        espData.Highlight = highlight
+        
+        -- 2D screen box (4 lines)
+        if Drawing then
+            for i = 1, 4 do
+                espData.BoxDrawing[i] = CreateBoxLine()
+            end
+        end
+        
+        -- Billboard text
+        local billboard = Instance.new("BillboardGui")
+        billboard.Name = "ESPText_" .. player.Name
+        billboard.AlwaysOnTop = true
+        billboard.Size = UDim2.new(0, 200, 0, 100)
+        billboard.StudsOffset = Vector3.new(0, 3, 0)
+        billboard.Enabled = false
+        billboard.Parent = CoreGui
+        espData.BillboardGui = billboard
+        
+        local textContainer = Instance.new("Frame", billboard)
+        textContainer.Size = UDim2.new(1, 0, 1, 0)
+        textContainer.BackgroundTransparency = 1
+        
+        local nameLabel = Instance.new("TextLabel", textContainer)
+        nameLabel.Name = "NameLabel"
+        nameLabel.Size = UDim2.new(1, 0, 0, Config.ESPTextSize)
+        nameLabel.Position = UDim2.new(0, 0, 0, 0)
+        nameLabel.BackgroundTransparency = 1
+        nameLabel.Text = player.Name
+        nameLabel.TextColor3 = RGBToColor3(Config.ESPTextColor)
+        nameLabel.Font = Enum.Font.GothamBold
+        nameLabel.TextSize = Config.ESPTextSize
+        nameLabel.TextStrokeTransparency = 0.5
+        nameLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+        
+        local healthLabel = Instance.new("TextLabel", textContainer)
+        healthLabel.Name = "HealthLabel"
+        healthLabel.Size = UDim2.new(1, 0, 0, Config.ESPTextSize)
+        healthLabel.Position = UDim2.new(0, 0, 0, Config.ESPTextSpacing)
+        healthLabel.BackgroundTransparency = 1
+        healthLabel.Text = "HP: 100"
+        healthLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+        healthLabel.Font = Enum.Font.Gotham
+        healthLabel.TextSize = Config.ESPTextSize
+        healthLabel.TextStrokeTransparency = 0.5
+        healthLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+        
+        local distanceLabel = Instance.new("TextLabel", textContainer)
+        distanceLabel.Name = "DistanceLabel"
+        distanceLabel.Size = UDim2.new(1, 0, 0, Config.ESPTextSize)
+        distanceLabel.Position = UDim2.new(0, 0, 0, Config.ESPTextSpacing * 2)
+        distanceLabel.BackgroundTransparency = 1
+        distanceLabel.Text = "0m"
+        distanceLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+        distanceLabel.Font = Enum.Font.Gotham
+        distanceLabel.TextSize = Config.ESPTextSize
+        distanceLabel.TextStrokeTransparency = 0.5
+        distanceLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+        
+        ESPObjects[player] = espData
+    end
+
+    local function RemoveESP(player)
+        if ESPObjects[player] then
+            if ESPObjects[player].Highlight then ESPObjects[player].Highlight:Destroy() end
+            if ESPObjects[player].BillboardGui then ESPObjects[player].BillboardGui:Destroy() end
+            if ESPObjects[player].BoxDrawing then
+                for _, line in pairs(ESPObjects[player].BoxDrawing) do
+                    line:Remove()
+                end
+            end
+            ESPObjects[player] = nil
+        end
+    end
+
+    -- Stable 2D screen-space box
+    local function UpdateESPBoxes(espData, character)
+        if not Drawing or not Config.ESPBoxes then 
+            if espData.BoxDrawing then
+                for _, line in pairs(espData.BoxDrawing) do
+                    line.Visible = false
+                end
+            end
+            return 
+        end
+
+        local humanoid = character:FindFirstChild("Humanoid")
+        local hrp = character:FindFirstChild("HumanoidRootPart")
+        if not humanoid or humanoid.Health <= 0 or not hrp then
+            if espData.BoxDrawing then
+                for _, line in pairs(espData.BoxDrawing) do
+                    line.Visible = false
+                end
+            end
+            return
+        end
+
+        local cf, size = character:GetBoundingBox()
+        local halfSize = size / 2
+
+        local corners = {
+            Vector3.new(-halfSize.X, -halfSize.Y, -halfSize.Z),
+            Vector3.new( halfSize.X, -halfSize.Y, -halfSize.Z),
+            Vector3.new(-halfSize.X,  halfSize.Y, -halfSize.Z),
+            Vector3.new( halfSize.X,  halfSize.Y, -halfSize.Z),
+            Vector3.new(-halfSize.X, -halfSize.Y,  halfSize.Z),
+            Vector3.new( halfSize.X, -halfSize.Y,  halfSize.Z),
+            Vector3.new(-halfSize.X,  halfSize.Y,  halfSize.Z),
+            Vector3.new( halfSize.X,  halfSize.Y,  halfSize.Z),
+        }
+
+        local minX, minY = math.huge, math.huge
+        local maxX, maxY = -math.huge, -math.huge
+        local anyOnScreen = false
+
+        for _, corner in ipairs(corners) do
+            local worldPos = cf:PointToWorldSpace(corner)
+            local screenPos, onScreen = WorldToViewportPoint(worldPos)
+            if onScreen then
+                anyOnScreen = true
+                minX = math.min(minX, screenPos.X)
+                maxX = math.max(maxX, screenPos.X)
+                minY = math.min(minY, screenPos.Y)
+                maxY = math.max(maxY, screenPos.Y)
+            end
+        end
+
+        if not anyOnScreen or minX == math.huge then
+            for _, line in pairs(espData.BoxDrawing) do
+                line.Visible = false
+            end
+            return
+        end
+
+        local topLeft     = Vector2.new(minX, minY)
+        local topRight    = Vector2.new(maxX, minY)
+        local bottomLeft  = Vector2.new(minX, maxY)
+        local bottomRight = Vector2.new(maxX, maxY)
+
+        local lines = espData.BoxDrawing
+        if not lines then return end
+
+        local color = RGBToColor3(Config.ESPBoxColor)
+
+        lines[1].From = topLeft
+        lines[1].To   = topRight
+        lines[1].Color = color
+        lines[1].Visible = true
+
+        lines[2].From = topRight
+        lines[2].To   = bottomRight
+        lines[2].Color = color
+        lines[2].Visible = true
+
+        lines[3].From = bottomRight
+        lines[3].To   = bottomLeft
+        lines[3].Color = color
+        lines[3].Visible = true
+
+        lines[4].From = bottomLeft
+        lines[4].To   = topLeft
+        lines[4].Color = color
+        lines[4].Visible = true
+    end
+
+    local function UpdateESP()
+        for player, espData in pairs(ESPObjects) do
+            if not player or not player.Parent or not player.Character then
+                if espData.Highlight then espData.Highlight.Enabled = false end
+                if espData.BillboardGui then espData.BillboardGui.Enabled = false end
+                if espData.BoxDrawing then
+                    for _, line in pairs(espData.BoxDrawing) do
+                        line.Visible = false
+                    end
+                end
+                continue
+            end
+            
+            local character = player.Character
+            local humanoid = character:FindFirstChild("Humanoid")
+            local rootPart = character:FindFirstChild("HumanoidRootPart")
+            
+            if not humanoid or humanoid.Health <= 0 or not rootPart then
+                if espData.Highlight then espData.Highlight.Enabled = false end
+                if espData.BillboardGui then espData.BillboardGui.Enabled = false end
+                if espData.BoxDrawing then
+                    for _, line in pairs(espData.BoxDrawing) do
+                        line.Visible = false
+                    end
+                end
+                continue
+            end
+            
+            if Config.TeamCheck and player.Team == LocalPlayer.Team then
+                if espData.Highlight then espData.Highlight.Enabled = false end
+                if espData.BillboardGui then espData.BillboardGui.Enabled = false end
+                if espData.BoxDrawing then
+                    for _, line in pairs(espData.BoxDrawing) do
+                        line.Visible = false
+                    end
+                end
+                continue
+            end
+            
+            -- Highlight for ESP (separate from target highlight)
+            if Config.ESPEnabled and espData.Highlight then
+                espData.Highlight.Adornee = character
+                espData.Highlight.FillColor = RGBToColor3(Config.ESPColor)
+                espData.Highlight.Enabled = true
+            elseif espData.Highlight then
+                espData.Highlight.Enabled = false
+            end
+            
+            -- 2D Boxes
+            UpdateESPBoxes(espData, character)
+            
+            -- Text
+            local showText = Config.ESPNames or Config.ESPHealth or Config.ESPDistance
+            if showText and espData.BillboardGui then
+                espData.BillboardGui.Adornee = rootPart
+                espData.BillboardGui.Enabled = true
+                
+                local container = espData.BillboardGui:FindFirstChild("Frame")
+                if container then
+                    local nameLabel = container:FindFirstChild("NameLabel")
+                    local healthLabel = container:FindFirstChild("HealthLabel")
+                    local distanceLabel = container:FindFirstChild("DistanceLabel")
+                    
+                    if nameLabel then
+                        nameLabel.Visible = Config.ESPNames
+                        nameLabel.TextSize = Config.ESPTextSize
+                        nameLabel.TextColor3 = RGBToColor3(Config.ESPTextColor)
+                    end
+                    
+                    if healthLabel then
+                        healthLabel.Visible = Config.ESPHealth
+                        healthLabel.TextSize = Config.ESPTextSize
+                        healthLabel.Position = UDim2.new(0, 0, 0, Config.ESPTextSpacing)
+                        local healthPercent = (humanoid.Health / humanoid.MaxHealth) * 100
+                        healthLabel.Text = string.format("HP: %.0f%%", healthPercent)
+                        if healthPercent > 75 then
+                            healthLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+                        elseif healthPercent > 50 then
+                            healthLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+                        elseif healthPercent > 25 then
+                            healthLabel.TextColor3 = Color3.fromRGB(255, 165, 0)
+                        else
+                            healthLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+                        end
+                    end
+                    
+                    if distanceLabel and LocalPlayer.Character 
+                        and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                        distanceLabel.Visible = Config.ESPDistance
+                        distanceLabel.TextSize = Config.ESPTextSize
+                        distanceLabel.Position = UDim2.new(0, 0, 0, Config.ESPTextSpacing * 2)
+                        local distance = (rootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                        distanceLabel.Text = string.format("%.0fm", distance)
+                    end
+                end
+            elseif espData.BillboardGui then
+                espData.BillboardGui.Enabled = false
+            end
+        end
+    end
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then 
+            CreateESP(player)
+        end
+    end
+
+    Players.PlayerAdded:Connect(CreateESP)
+    Players.PlayerRemoving:Connect(RemoveESP)
+
+    -----------------------------------------------------------------
+    -- RAINBOW / FOV / ESP HEARTBEAT
+    -----------------------------------------------------------------
+    RunService.Heartbeat:Connect(function()
+        RainbowHue = (RainbowHue + 1) % 360
+        local rainbowColor = Color3.fromHSV(RainbowHue / 360, 1, 1)
+        
+        if Config.RainbowFOV then
+            Config.FOVColor = {
+                math.floor(rainbowColor.R * 255),
+                math.floor(rainbowColor.G * 255),
+                math.floor(rainbowColor.B * 255)
+            }
+            FOVStroke.Color = rainbowColor
+        end
+        
+        if Config.RainbowCrosshair then
+            Config.CrosshairColor = {
+                math.floor(rainbowColor.R * 255),
+                math.floor(rainbowColor.G * 255),
+                math.floor(rainbowColor.B * 255)
+            }
+            Crosshair.BackgroundColor3 = rainbowColor
+            HorizontalLine.BackgroundColor3 = rainbowColor
+            VerticalLine.BackgroundColor3 = rainbowColor
+        end
+        
+        if Config.RainbowESP then
+            Config.ESPColor = {
+                math.floor(rainbowColor.R * 255),
+                math.floor(rainbowColor.G * 255),
+                math.floor(rainbowColor.B * 255)
+            }
+            Config.ESPBoxColor = {
+                math.floor(rainbowColor.R * 255),
+                math.floor(rainbowColor.G * 255),
+                math.floor(rainbowColor.B * 255)
+            }
+            for _, esp in pairs(ESPObjects) do
+                if esp.Highlight then esp.Highlight.FillColor = rainbowColor end
+                if esp.BoxDrawing then
+                    for _, line in pairs(esp.BoxDrawing) do
+                        line.Color = rainbowColor
+                    end
+                end
+            end
+        end
+        
+        if Config.RainbowHighlight then
+            Config.HighlightColor = {
+                math.floor(rainbowColor.R * 255),
+                math.floor(rainbowColor.G * 255),
+                math.floor(rainbowColor.B * 255)
+            }
+            TargetHighlight.FillColor = rainbowColor
+        end
+        
+        if Config.RainbowTheme then
+            Config.ThemeColor = {
+                math.floor(rainbowColor.R * 255),
+                math.floor(rainbowColor.G * 255),
+                math.floor(rainbowColor.B * 255)
+            }
+            UpdateUITheme()
+        end
+        
+        UpdateFOVPosition()
+        UpdateESP()
+    end)
+
+    -----------------------------------------------------------------
+    -- UI BUILD HELPERS (Sections, Toggles, Sliders, Colors, etc.)
+    -----------------------------------------------------------------
+    local function CreateSection(title)
+        local section = Instance.new("Frame", Content)
+        section.Size = UDim2.new(1, 0, 0, 0)
+        section.BackgroundColor3 = RGBToColor3(Config.SectionColor)
+        section.BorderSizePixel = 0
+        section.AutomaticSize = Enum.AutomaticSize.Y
+        section.LayoutOrder = #Content:GetChildren()
+        
+        local sectionCorner = Instance.new("UICorner", section)
+        sectionCorner.CornerRadius = UDim.new(0, 8)
+        
+        local sectionTitle = Instance.new("TextLabel", section)
+        sectionTitle.Size = UDim2.new(1, -20, 0, 28)
+        sectionTitle.Position = UDim2.new(0, 12, 0, 0)
+        sectionTitle.BackgroundTransparency = 1
+        sectionTitle.Text = title
+        sectionTitle.TextColor3 = RGBToColor3(Config.ThemeColor)
+        sectionTitle.Font = Enum.Font.GothamBold
+        sectionTitle.TextSize = 13
+        sectionTitle.TextXAlignment = Enum.TextXAlignment.Left
+        
+        local divider = Instance.new("Frame", section)
+        divider.Size = UDim2.new(1, -24, 0, 1)
+        divider.Position = UDim2.new(0, 12, 0, 28)
+        divider.BackgroundColor3 = RGBToColor3(Config.ThemeColor)
+        divider.BorderSizePixel = 0
+        divider.BackgroundTransparency = 0.6
+        
+        local layout = Instance.new("UIListLayout", section)
+        layout.Padding = UDim.new(0, 6)
+        layout.SortOrder = Enum.SortOrder.LayoutOrder
+        
+        local padding = Instance.new("UIPadding", section)
+        padding.PaddingTop = UDim.new(0, 34)
+        padding.PaddingBottom = UDim.new(0, 8)
+        padding.PaddingLeft = UDim.new(0, 10)
+        padding.PaddingRight = UDim.new(0, 10)
+        
+        return section
+    end
+
+    -- Which sliders should use decimals:
+    local DecimalSettings = {
+        UITransparency = true,
+        UIScale        = true,
+        Smoothness     = true,
+        Prediction     = true,
+    }
+
+    local function CreateToggle(parent, text, settingName)
+        local toggle = Instance.new("Frame", parent)
+        toggle.Size = UDim2.new(1, 0, 0, 32)
+        toggle.BackgroundColor3 = Color3.fromRGB(38, 38, 46)
+        toggle.BorderSizePixel = 0
+        toggle.LayoutOrder = #parent:GetChildren()
+        
+        local toggleCorner = Instance.new("UICorner", toggle)
+        toggleCorner.CornerRadius = UDim.new(0, 6)
+        
+        local label = Instance.new("TextLabel", toggle)
+        label.Size = UDim2.new(1, -55, 1, 0)
+        label.Position = UDim2.new(0, 10, 0, 0)
+        label.BackgroundTransparency = 1
+        label.Text = text
+        label.TextColor3 = Color3.new(1, 1, 1)
+        label.Font = Enum.Font.Gotham
+        label.TextSize = 11
+        label.TextXAlignment = Enum.TextXAlignment.Left
+        
+        local switchBg = Instance.new("Frame", toggle)
+        switchBg.Size = UDim2.new(0, 42, 0, 22)
+        switchBg.Position = UDim2.new(1, -48, 0.5, -11)
+        switchBg.BackgroundColor3 =
+            Config[settingName] and RGBToColor3(Config.ThemeColor) or Color3.fromRGB(70, 70, 80)
+        switchBg.BorderSizePixel = 0
+        
+        local switchCorner = Instance.new("UICorner", switchBg)
+        switchCorner.CornerRadius = UDim.new(1, 0)
+        
+        local switchKnob = Instance.new("Frame", switchBg)
+        switchKnob.Size = UDim2.new(0, 16, 0, 16)
+        switchKnob.Position =
+            Config[settingName] and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)
+        switchKnob.BackgroundColor3 = Color3.new(1, 1, 1)
+        switchKnob.BorderSizePixel = 0
+        
+        local knobCorner = Instance.new("UICorner", switchKnob)
+        knobCorner.CornerRadius = UDim.new(1, 0)
+        
+        local button = Instance.new("TextButton", toggle)
+        button.Size = UDim2.new(1, 0, 1, 0)
+        button.BackgroundTransparency = 1
+        button.Text = ""
+        
+        button.MouseButton1Click:Connect(function()
+            Config[settingName] = not Config[settingName]
+            Animate(
+                switchBg,
+                "BackgroundColor3",
+                Config[settingName] and RGBToColor3(Config.ThemeColor) or Color3.fromRGB(70, 70, 80)
+            )
+            Animate(
+                switchKnob,
+                "Position",
+                Config[settingName] and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)
+            )
+            
+            if settingName == "ShowFOV" then
+                FOVCircle.Visible = Config.ShowFOV
+
+            elseif settingName == "ShowCrosshair" then
+                Crosshair.Visible = Config.ShowCrosshair
+                HorizontalLine.Visible = Config.ShowCrosshair
+                VerticalLine.Visible = Config.ShowCrosshair
+
+            elseif settingName == "ESPEnabled" and not Config.ESPEnabled then 
+                for _, esp in pairs(ESPObjects) do 
+                    if esp.Highlight then esp.Highlight.Enabled = false end
+                end
+
+            elseif settingName == "ESPBoxes" and not Config.ESPBoxes then
+                for _, esp in pairs(ESPObjects) do
+                    if esp.BoxDrawing then
+                        for _, line in pairs(esp.BoxDrawing) do
+                            line.Visible = false
+                        end
+                    end
+                end
+
+            elseif settingName == "HighlightEnabled" and not Config.HighlightEnabled then
+                TargetHighlight.Enabled = false
+
+            elseif settingName == "RainbowTheme" then
+                if not Config.RainbowTheme then
+                    UpdateUITheme()
+                end
+            end
+        end)
+        
+        return toggle
+    end
+
+    local function CreateSlider(parent, text, min, max, settingName, format)
+        local slider = Instance.new("Frame", parent)
+        slider.Size = UDim2.new(1, 0, 0, 46)
+        slider.BackgroundColor3 = Color3.fromRGB(38, 38, 46)
+        slider.BorderSizePixel = 0
+        slider.LayoutOrder = #parent:GetChildren()
+        
+        local sliderCorner = Instance.new("UICorner", slider)
+        sliderCorner.CornerRadius = UDim.new(0, 6)
+        
+        local label = Instance.new("TextLabel", slider)
+        label.Size = UDim2.new(1, -65, 0, 18)
+        label.Position = UDim2.new(0, 10, 0, 6)
+        label.BackgroundTransparency = 1
+        label.Text = text
+        label.TextColor3 = Color3.new(1, 1, 1)
+        label.Font = Enum.Font.Gotham
+        label.TextSize = 11
+        label.TextXAlignment = Enum.TextXAlignment.Left
+        
+        local value = Instance.new("TextLabel", slider)
+        value.Size = UDim2.new(0, 50, 0, 18)
+        value.Position = UDim2.new(1, -58, 0, 6)
+        value.BackgroundTransparency = 1
+        value.Text = format and format(Config[settingName]) or tostring(Config[settingName])
+        value.TextColor3 = RGBToColor3(Config.ThemeColor)
+        value.Font = Enum.Font.GothamBold
+        value.TextSize = 11
+        
+        local track = Instance.new("Frame", slider)
+        track.Size = UDim2.new(1, -20, 0, 4)
+        track.Position = UDim2.new(0, 10, 0, 30)
+        track.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+        track.BorderSizePixel = 0
+        
+        local trackCorner = Instance.new("UICorner", track)
+        trackCorner.CornerRadius = UDim.new(1, 0)
+        
+        local fill = Instance.new("Frame", track)
+        fill.Size = UDim2.new((Config[settingName] - min) / (max - min), 0, 1, 0)
+        fill.BackgroundColor3 = RGBToColor3(Config.ThemeColor)
+        fill.BorderSizePixel = 0
+        
+        local fillCorner = Instance.new("UICorner", fill)
+        fillCorner.CornerRadius = UDim.new(1, 0)
+        
+        local knob = Instance.new("Frame", track)
+        knob.Size = UDim2.new(0, 12, 0, 12)
+        knob.Position = UDim2.new((Config[settingName] - min) / (max - min), -6, 0.5, -6)
+        knob.BackgroundColor3 = Color3.new(1, 1, 1)
+        knob.BorderSizePixel = 0
+        
+        local knobCorner = Instance.new("UICorner", knob)
+        knobCorner.CornerRadius = UDim.new(1, 0)
+        
+        local knobStroke = Instance.new("UIStroke", knob)
+        knobStroke.Color = RGBToColor3(Config.ThemeColor)
+        knobStroke.Thickness = 2
+        
+        local function updateValue(val)
+            val = math.clamp(val, min, max)
+
+            if DecimalSettings[settingName] then
+                val = math.floor(val * 100) / 100
+            else
+                val = math.floor(val)
+            end
+
+            Config[settingName] = val
+            
+            local percent = (val - min) / (max - min)
+            fill.Size = UDim2.new(percent, 0, 1, 0)
+            knob.Position = UDim2.new(percent, -6, 0.5, -6)
+            value.Text = format and format(val) or tostring(val)
+            
+            if settingName == "FOV" then 
+                FOVCircle.Size = UDim2.new(0, val, 0, val)
+                UpdateFOVPosition()
+
+            elseif settingName == "CrosshairSize" then
+                HorizontalLine.Size = UDim2.new(0, val, 0, 2)
+                VerticalLine.Size = UDim2.new(0, 2, 0, val)
+
+            elseif settingName == "UITransparency" then
+                MainFrame.BackgroundTransparency = val
+
+            elseif settingName == "UIScale" then
+                if UIScaleObj then
+                    UIScaleObj.Scale = val
+                end
+            end
+        end
+        
+        local dragging = false
+        
+        knob.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1
+                or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+            end
+        end)
+        
+        UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1
+                or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = false
+            end
+        end)
+        
+        UserInputService.InputChanged:Connect(function(input)
+            if dragging and (
+                input.UserInputType == Enum.UserInputType.MouseMovement
+                or input.UserInputType == Enum.UserInputType.Touch
+            ) then
+                local mousePos = UserInputService:GetMouseLocation().X
+                local trackPos = track.AbsolutePosition.X
+                local trackSize = track.AbsoluteSize.X
+                local percent = math.clamp((mousePos - trackPos) / trackSize, 0, 1)
+                updateValue(min + (percent * (max - min)))
+            end
+        end)
+        
+        return slider
+    end
+
+    local function CreateColorSlider(parent, text, settingName, rainbowSetting)
+        local colorFrame = Instance.new("Frame", parent)
+        colorFrame.Size = UDim2.new(1, 0, 0, 110)
+        colorFrame.BackgroundColor3 = Color3.fromRGB(38, 38, 46)
+        colorFrame.BorderSizePixel = 0
+        colorFrame.LayoutOrder = #parent:GetChildren()
+        
+        local colorCorner = Instance.new("UICorner", colorFrame)
+        colorCorner.CornerRadius = UDim.new(0, 6)
+        
+        local label = Instance.new("TextLabel", colorFrame)
+        label.Size = UDim2.new(1, -75, 0, 22)
+        label.Position = UDim2.new(0, 10, 0, 6)
+        label.BackgroundTransparency = 1
+        label.Text = text
+        label.TextColor3 = Color3.new(1, 1, 1)
+        label.Font = Enum.Font.Gotham
+        label.TextSize = 11
+        label.TextXAlignment = Enum.TextXAlignment.Left
+        
+        local preview = Instance.new("Frame", colorFrame)
+        preview.Size = UDim2.new(0, 40, 0, 22)
+        preview.Position = UDim2.new(1, -75, 0, 6)
+        preview.BackgroundColor3 = RGBToColor3(Config[settingName])
+        preview.BorderSizePixel = 0
+        
+        local previewCorner = Instance.new("UICorner", preview)
+        previewCorner.CornerRadius = UDim.new(0, 5)
+        
+        local rainbowBtn = Instance.new("TextButton", colorFrame)
+        rainbowBtn.Size = UDim2.new(0, 28, 0, 22)
+        rainbowBtn.Position = UDim2.new(1, -30, 0, 6)
+        rainbowBtn.BackgroundColor3 =
+            (rainbowSetting and Config[rainbowSetting]) and RGBToColor3(Config.ThemeColor)
+            or Color3.fromRGB(60, 60, 70)
+        rainbowBtn.Text = "RGB"
+        rainbowBtn.TextColor3 = Color3.new(1, 1, 1)
+        rainbowBtn.Font = Enum.Font.GothamBold
+        rainbowBtn.TextSize = 9
+        rainbowBtn.AutoButtonColor = false
+        
+        local rainbowCorner = Instance.new("UICorner", rainbowBtn)
+        rainbowCorner.CornerRadius = UDim.new(0, 5)
+        
+        if rainbowSetting then
+            rainbowBtn.MouseButton1Click:Connect(function()
+                Config[rainbowSetting] = not Config[rainbowSetting]
+                rainbowBtn.BackgroundColor3 =
+                    Config[rainbowSetting] and RGBToColor3(Config.ThemeColor)
+                    or Color3.fromRGB(60, 60, 70)
+            end)
+        end
+        
+        local function createRGBSlider(colorName, index, yPos)
+            local track = Instance.new("Frame", colorFrame)
+            track.Size = UDim2.new(1, -100, 0, 3)
+            track.Position = UDim2.new(0, 50, 0, yPos)
+            track.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+            track.BorderSizePixel = 0
+            
+            local trackCorner = Instance.new("UICorner", track)
+            trackCorner.CornerRadius = UDim.new(1, 0)
+            
+            local baseColor = index == 1 and Color3.fromRGB(255, 0, 0)
+                or (index == 2 and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(0, 0, 255))
+
+            local fill = Instance.new("Frame", track)
+            fill.Size = UDim2.new(Config[settingName][index] / 255, 0, 1, 0)
+            fill.BackgroundColor3 = baseColor
+            fill.BorderSizePixel = 0
+            
+            local fillCorner = Instance.new("UICorner", fill)
+            fillCorner.CornerRadius = UDim.new(1, 0)
+            
+            local knob = Instance.new("Frame", track)
+            knob.Size = UDim2.new(0, 10, 0, 10)
+            knob.Position = UDim2.new(Config[settingName][index] / 255, -5, 0.5, -5)
+            knob.BackgroundColor3 = Color3.new(1, 1, 1)
+            knob.BorderSizePixel = 0
+            
+            local knobCorner = Instance.new("UICorner", knob)
+            knobCorner.CornerRadius = UDim.new(1, 0)
+            
+            local colorLabel = Instance.new("TextLabel", colorFrame)
+            colorLabel.Size = UDim2.new(0, 35, 0, 18)
+            colorLabel.Position = UDim2.new(0, 10, 0, yPos - 7)
+            colorLabel.BackgroundTransparency = 1
+            colorLabel.Text = colorName .. ":"
+            colorLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+            colorLabel.Font = Enum.Font.Gotham
+            colorLabel.TextSize = 10
+            colorLabel.TextXAlignment = Enum.TextXAlignment.Left
+            
+            local valueLabel = Instance.new("TextLabel", colorFrame)
+            valueLabel.Size = UDim2.new(0, 35, 0, 18)
+            valueLabel.Position = UDim2.new(1, -45, 0, yPos - 8)
+            valueLabel.BackgroundTransparency = 1
+            valueLabel.Text = tostring(Config[settingName][index])
+            valueLabel.TextColor3 = RGBToColor3(Config.ThemeColor)
+            valueLabel.Font = Enum.Font.GothamBold
+            valueLabel.TextSize = 10
+            
+            local function updateColor(val)
+                val = math.clamp(math.floor(val), 0, 255)
+                Config[settingName][index] = val
+                
+                local percent = val / 255
+                fill.Size = UDim2.new(percent, 0, 1, 0)
+                knob.Position = UDim2.new(percent, -5, 0.5, -5)
+                valueLabel.Text = tostring(val)
+                
+                local color = RGBToColor3(Config[settingName])
+                preview.BackgroundColor3 = color
+                
+                if rainbowSetting then
+                    Config[rainbowSetting] = false
+                    rainbowBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+                end
+                
+                if settingName == "FOVColor" then
+                    FOVStroke.Color = color
+
+                elseif settingName == "CrosshairColor" then
+                    Crosshair.BackgroundColor3 = color
+                    HorizontalLine.BackgroundColor3 = color
+                    VerticalLine.BackgroundColor3 = color
+
+                elseif settingName == "ESPColor" then 
+                    for _, esp in pairs(ESPObjects) do 
+                        if esp.Highlight then esp.Highlight.FillColor = color end
+                    end
+
+                elseif settingName == "ESPBoxColor" then
+                    for _, esp in pairs(ESPObjects) do
+                        if esp.BoxDrawing then
+                            for _, line in pairs(esp.BoxDrawing) do
+                                line.Color = color
+                            end
+                        end
+                    end
+
+                elseif settingName == "HighlightColor" then
+                    TargetHighlight.FillColor = color
+
+                elseif settingName == "ThemeColor"
+                    or settingName == "BackgroundColor"
+                    or settingName == "SectionColor" then
+                    UpdateUITheme()
+                end
+            end
+            
+            local dragging = false
+            knob.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1
+                    or input.UserInputType == Enum.UserInputType.Touch then
+                    dragging = true
+                end
+            end)
+            
+            UserInputService.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1
+                    or input.UserInputType == Enum.UserInputType.Touch then
+                    dragging = false
+                end
+            end)
+            
+            UserInputService.InputChanged:Connect(function(input)
+                if dragging and (
+                    input.UserInputType == Enum.UserInputType.MouseMovement
+                    or input.UserInputType == Enum.UserInputType.Touch
+                ) then
+                    local mousePos = UserInputService:GetMouseLocation().X
+                    local trackPos = track.AbsolutePosition.X
+                    local trackSize = track.AbsoluteSize.X
+                    local percent = math.clamp((mousePos - trackPos) / trackSize, 0, 1)
+                    updateColor(percent * 255)
+                end
+            end)
+        end
+        
+        createRGBSlider("R", 1, 38)
+        createRGBSlider("G", 2, 60)
+        createRGBSlider("B", 3, 82)
+        
+        return colorFrame
+    end
+
+    local function CreateAimPartSelector(parent)
+        local selector = Instance.new("Frame", parent)
+        selector.Size = UDim2.new(1, 0, 0, 60)
+        selector.BackgroundColor3 = Color3.fromRGB(38, 38, 46)
+        selector.BorderSizePixel = 0
+        selector.LayoutOrder = #parent:GetChildren()
+        
+        local selectorCorner = Instance.new("UICorner", selector)
+        selectorCorner.CornerRadius = UDim.new(0, 6)
+        
+        local label = Instance.new("TextLabel", selector)
+        label.Size = UDim2.new(1, -20, 0, 20)
+        label.Position = UDim2.new(0, 10, 0, 6)
+        label.BackgroundTransparency = 1
+        label.Text = "Target Body Part"
+        label.TextColor3 = Color3.new(1, 1, 1)
+        label.Font = Enum.Font.Gotham
+        label.TextSize = 11
+        label.TextXAlignment = Enum.TextXAlignment.Left
+        
+        local options = {"Head", "Body", "Torso", "Random"}
+        local buttonWidth = IsMobile and 68 or 70
+        local buttonSpacing = IsMobile and 73 or 75
+        
+        for i, option in ipairs(options) do
+            local btn = Instance.new("TextButton", selector)
+            btn.Size = UDim2.new(0, buttonWidth, 0, 26)
+            btn.Position = UDim2.new(0, 10 + ((i-1) * buttonSpacing), 0, 30)
+            btn.BackgroundColor3 =
+                Config.AimPart == option and RGBToColor3(Config.ThemeColor)
+                or Color3.fromRGB(60, 60, 70)
+            btn.Text = option
+            btn.TextColor3 = Color3.new(1, 1, 1)
+            btn.Font = Enum.Font.GothamBold
+            btn.TextSize = 10
+            btn.AutoButtonColor = false
+            
+            local btnCorner = Instance.new("UICorner", btn)
+            btnCorner.CornerRadius = UDim.new(0, 5)
+            
+            btn.MouseButton1Click:Connect(function()
+                Config.AimPart = option
+                for _, child in pairs(selector:GetChildren()) do
+                    if child:IsA("TextButton") then
+                        child.BackgroundColor3 =
+                            child.Text == option and RGBToColor3(Config.ThemeColor)
+                            or Color3.fromRGB(60, 60, 70)
+                    end
+                end
+                if option == "Random" then RandomAimData.ShotCount = 0 end
+            end)
+        end
+        
+        return selector
+    end
+
+    local SavedConfigsLabel
+
+    local function CreateConfigButtons(parent)
+        local configFrame = Instance.new("Frame", parent)
+        configFrame.Size = UDim2.new(1, 0, 0, 110)
+        configFrame.BackgroundTransparency = 1
+        configFrame.LayoutOrder = #parent:GetChildren()
+
+        local slotLabel = Instance.new("TextLabel", configFrame)
+        slotLabel.Size = UDim2.new(0.5, 0, 0, 20)
+        slotLabel.Position = UDim2.new(0, 0, 0, 0)
+        slotLabel.BackgroundTransparency = 1
+        slotLabel.Text = "Config Slot: " .. CurrentConfigSlot
+        slotLabel.TextColor3 = RGBToColor3(Config.ThemeColor)
+        slotLabel.Font = Enum.Font.GothamBold
+        slotLabel.TextSize = 11
+        slotLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+        SavedConfigsLabel = Instance.new("TextLabel", configFrame)
+        SavedConfigsLabel.Size = UDim2.new(0.5, 0, 0, 20)
+        SavedConfigsLabel.Position = UDim2.new(0.5, 0, 0, 0)
+        SavedConfigsLabel.BackgroundTransparency = 1
+        SavedConfigsLabel.Text = "Saved: " .. GetSavedSlotsCount() .. "/" .. MaxConfigSlots
+        SavedConfigsLabel.TextColor3 = Color3.fromRGB(34, 197, 94)
+        SavedConfigsLabel.Font = Enum.Font.GothamBold
+        SavedConfigsLabel.TextSize = 11
+        SavedConfigsLabel.TextXAlignment = Enum.TextXAlignment.Right
+
+        local slotSelector = Instance.new("Frame", configFrame)
+        slotSelector.Size = UDim2.new(1, 0, 0, 28)
+        slotSelector.Position = UDim2.new(0, 0, 0, 25)
+        slotSelector.BackgroundTransparency = 1
+
+        local slotWidth = IsMobile and 56 or 58
+        local slotSpacing = IsMobile and 61 or 63
+
+        for i = 1, MaxConfigSlots do
+            local slotBtn = Instance.new("TextButton", slotSelector)
+            slotBtn.Size = UDim2.new(0, slotWidth, 0, 26)
+            slotBtn.Position = UDim2.new(0, (i-1) * slotSpacing, 0, 0)
+            slotBtn.BackgroundColor3 =
+                CurrentConfigSlot == i and RGBToColor3(Config.ThemeColor)
+                or Color3.fromRGB(60, 60, 70)
+            slotBtn.Text = tostring(i)
+            slotBtn.TextColor3 = Color3.new(1, 1, 1)
+            slotBtn.Font = Enum.Font.GothamBold
+            slotBtn.TextSize = 12
+            slotBtn.AutoButtonColor = false
+
+            local slotCorner = Instance.new("UICorner", slotBtn)
+            slotCorner.CornerRadius = UDim.new(0, 5)
+
+            slotBtn.MouseButton1Click:Connect(function()
+                CurrentConfigSlot = i
+                slotLabel.Text = "Config Slot: " .. CurrentConfigSlot
+                for _, child in pairs(slotSelector:GetChildren()) do
+                    if child:IsA("TextButton") then
+                        child.BackgroundColor3 =
+                            child.Text == tostring(i) and RGBToColor3(Config.ThemeColor)
+                            or Color3.fromRGB(60, 60, 70)
+                    end
+                end
+            end)
+        end
+
+        local saveBtn = Instance.new("TextButton", configFrame)
+        saveBtn.Size = UDim2.new(0.32, 0, 0, 28)
+        saveBtn.Position = UDim2.new(0, 0, 0, 58)
+        saveBtn.BackgroundColor3 = Color3.fromRGB(34, 197, 94)
+        saveBtn.Text = "SAVE"
+        saveBtn.TextColor3 = Color3.new(1, 1, 1)
+        saveBtn.Font = Enum.Font.GothamBold
+        saveBtn.TextSize = 11
+        saveBtn.AutoButtonColor = false
+
+        local saveCorner = Instance.new("UICorner", saveBtn)
+        saveCorner.CornerRadius = UDim.new(0, 6)
+
+        local loadBtn = Instance.new("TextButton", configFrame)
+        loadBtn.Size = UDim2.new(0.32, 0, 0, 28)
+        loadBtn.Position = UDim2.new(0.34, 0, 0, 58)
+        loadBtn.BackgroundColor3 = Color3.fromRGB(59, 130, 246)
+        loadBtn.Text = "LOAD"
+        loadBtn.TextColor3 = Color3.new(1, 1, 1)
+        loadBtn.Font = Enum.Font.GothamBold
+        loadBtn.TextSize = 11
+        loadBtn.AutoButtonColor = false
+
+        local loadCorner = Instance.new("UICorner", loadBtn)
+        loadCorner.CornerRadius = UDim.new(0, 6)
+
+        local deleteBtn = Instance.new("TextButton", configFrame)
+        deleteBtn.Size = UDim2.new(0.32, 0, 0, 28)
+        deleteBtn.Position = UDim2.new(0.68, 0, 0, 58)
+        deleteBtn.BackgroundColor3 = Color3.fromRGB(239, 68, 68)
+        deleteBtn.Text = "DELETE"
+        deleteBtn.TextColor3 = Color3.new(1, 1, 1)
+        deleteBtn.Font = Enum.Font.GothamBold
+        deleteBtn.TextSize = 11
+        deleteBtn.AutoButtonColor = false
+
+        local deleteCorner = Instance.new("UICorner", deleteBtn)
+        deleteCorner.CornerRadius = UDim.new(0, 6)
+
+        saveBtn.MouseButton1Click:Connect(function()
+            SaveConfig()
+            SavedConfigsLabel.Text = "Saved: " .. GetSavedSlotsCount() .. "/" .. MaxConfigSlots
+        end)
+
+        loadBtn.MouseButton1Click:Connect(function()
+            if LoadConfig() then
+                FOVCircle.Visible = Config.ShowFOV
+                FOVCircle.Size = UDim2.new(0, Config.FOV, 0, Config.FOV)
+                UpdateFOVPosition()
+
+                Crosshair.Visible = Config.ShowCrosshair
+                HorizontalLine.Visible = Config.ShowCrosshair
+                VerticalLine.Visible = Config.ShowCrosshair
+                HorizontalLine.Size = UDim2.new(0, Config.CrosshairSize, 0, 2)
+                VerticalLine.Size = UDim2.new(0, 2, 0, Config.CrosshairSize)
+
+                if UIScaleObj then UIScaleObj.Scale = Config.UIScale end
+                MainFrame.BackgroundTransparency = Config.UITransparency
+
+                UpdateUITheme()
+            end
+        end)
+
+        deleteBtn.MouseButton1Click:Connect(function()
+            DeleteConfig()
+            SavedConfigsLabel.Text = "Saved: " .. GetSavedSlotsCount() .. "/" .. MaxConfigSlots
+        end)
+
+        return configFrame
+    end
+
+    -----------------------------------------------------------------
+    -- BUILD ALL SECTIONS
+    -----------------------------------------------------------------
+    -- AIM
+    local aimSection = CreateSection("🎯 AIM")
+    CreateToggle(aimSection, "Enable Aimbot", "AimEnabled")
+    CreateAimPartSelector(aimSection)
+    CreateToggle(aimSection, "Wall Check", "WallCheck")
+
+    -- VISUALS
+    local visualSection = CreateSection("👁️ VISUALS")
+    CreateToggle(visualSection, "Show FOV Circle", "ShowFOV")
+    CreateSlider(visualSection, "FOV Size", 50, 300, "FOV", function(v) return tostring(math.floor(v)) end)
+    CreateColorSlider(visualSection, "FOV Color", "FOVColor", "RainbowFOV")
+    CreateToggle(visualSection, "Show Crosshair", "ShowCrosshair")
+    CreateSlider(visualSection, "Crosshair Size", 8, 30, "CrosshairSize", function(v) return tostring(math.floor(v)) end)
+    CreateColorSlider(visualSection, "Crosshair Color", "CrosshairColor", "RainbowCrosshair")
+
+    -- ESP
+    local espSection = CreateSection("🔍 ESP")
+    CreateToggle(espSection, "Enable ESP", "ESPEnabled")
+    CreateToggle(espSection, "Show 2D Boxes", "ESPBoxes")
+    CreateToggle(espSection, "Team Check", "TeamCheck")
+    CreateToggle(espSection, "Show Names", "ESPNames")
+    CreateToggle(espSection, "Show Health", "ESPHealth")
+    CreateToggle(espSection, "Show Distance", "ESPDistance")
+    CreateSlider(espSection, "Text Size", 10, 20, "ESPTextSize", function(v) return tostring(math.floor(v)) end)
+    CreateSlider(espSection, "Text Line Spacing", 12, 30, "ESPTextSpacing", function(v) return tostring(math.floor(v)) .. "px" end)
+    CreateColorSlider(espSection, "ESP Color", "ESPColor", "RainbowESP")
+    CreateColorSlider(espSection, "ESP Box Color", "ESPBoxColor", "RainbowESP")
+
+    -- TARGET HIGHLIGHT
+    local highlightSection = CreateSection("✨ TARGET HIGHLIGHT")
+    CreateToggle(highlightSection, "Enable Highlight", "HighlightEnabled")
+    CreateColorSlider(highlightSection, "Highlight Color", "HighlightColor", "RainbowHighlight")
+
+    -- UI CUSTOMIZATION
+    local uiSection = CreateSection("⚙️ UI CUSTOMIZATION")
+    CreateToggle(uiSection, "Rainbow Theme", "RainbowTheme")
+    CreateSlider(uiSection, "UI Transparency", 0, 0.8, "UITransparency", function(v) return string.format("%.2f", v) end)
+    CreateSlider(uiSection, "UI Scale", 0.7, 1.3, "UIScale", function(v) return string.format("%.2f", v) end)
+    CreateColorSlider(uiSection, "Theme Color", "ThemeColor", nil)
+    CreateColorSlider(uiSection, "Background Color", "BackgroundColor", nil)
+    CreateColorSlider(uiSection, "Section Color", "SectionColor", nil)
+
+    -- SETTINGS
+    local settingsSection = CreateSection("🔧 SETTINGS")
+    CreateSlider(settingsSection, "Smoothness", 0.1, 0.8, "Smoothness", function(v) return string.format("%.2f", v) end)
+    CreateSlider(settingsSection, "Max Distance", 100, 1000, "MaxDistance", function(v) return tostring(math.floor(v)) end)
+    CreateSlider(settingsSection, "Prediction", 0, 0.5, "Prediction", function(v) return string.format("%.2f", v) end)
+    CreateConfigButtons(settingsSection)
+
+    -----------------------------------------------------------------
+    -- TARGETING SYSTEM
+    -----------------------------------------------------------------
+    local function GetRandomAimPart()
+        local parts = {"Head", "UpperTorso", "LowerTorso"}
+        RandomAimData.ShotCount = RandomAimData.ShotCount + 1
+        if RandomAimData.ShotCount >= RandomAimData.MaxShots then
+            RandomAimData.ShotCount = 0
+            RandomAimData.CurrentPart = "Head"
+            return "Head"
+        else
+            RandomAimData.CurrentPart = parts[math.random(1, #parts)]
+            return RandomAimData.CurrentPart
+        end
+    end
+
+    local function IsVisible(targetPart)
+        if not Config.WallCheck then return true end
+        local origin = Camera.CFrame.Position
+        local direction = (targetPart.Position - origin).Unit * Config.MaxDistance
+        local params = RaycastParams.new()
+        params.FilterDescendantsInstances = {LocalPlayer.Character}
+        params.FilterType = Enum.RaycastFilterType.Exclude
+        params.IgnoreWater = true
+        local result = Workspace:Raycast(origin, direction, params)
+        if result then return result.Instance:IsDescendantOf(targetPart.Parent) end
+        return true
+    end
+
+    local function GetBodyPart(char)
+        local aimPart = Config.AimPart
+        if aimPart == "Random" then
+            aimPart = GetRandomAimPart()
+        end
+
+        if aimPart == "Head" then
+            return char:FindFirstChild("Head")
+
+        elseif aimPart == "Body" then
+            return char:FindFirstChild("UpperTorso")
+                or char:FindFirstChild("Torso")
+                or char:FindFirstChild("HumanoidRootPart")
+
+        elseif aimPart == "Torso" then
+            return char:FindFirstChild("LowerTorso")
+                or char:FindFirstChild("Torso")
+                or char:FindFirstChild("HumanoidRootPart")
+        end
+
+        return char:FindFirstChild(aimPart)
+            or char:FindFirstChild("Head")
+            or char:FindFirstChild("HumanoidRootPart")
+    end
+
+    local function GetClosestTarget()
+        local viewportSize = Camera.ViewportSize
+        local center = Vector2.new(viewportSize.X / 2, viewportSize.Y / 2)
+        local closest = nil
+        local shortestDist = Config.FOV / 2
+        
+        for _, player in pairs(Players:GetPlayers()) do
+            if player == LocalPlayer then continue end
+            if Config.TeamCheck and player.Team == LocalPlayer.Team then continue end
+            local char = player.Character
+            if not char then continue end
+            local hum = char:FindFirstChild("Humanoid")
+            if not hum or hum.Health <= 0 then continue end
+            local part = GetBodyPart(char)
+            if not part then continue end
+            local dist = (part.Position - Camera.CFrame.Position).Magnitude
+            if dist > Config.MaxDistance then continue end
+            if not IsVisible(part) then continue end
+            local pos, onScreen = Camera:WorldToViewportPoint(part.Position)
+            if onScreen then
+                local screenDist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
+                if screenDist < shortestDist then
+                    shortestDist = screenDist
+                    closest = char
+                end
+            end
+        end
+        return closest
+    end
+
+    -----------------------------------------------------------------
+    -- MAIN AIM / HIGHLIGHT LOOP
+    -----------------------------------------------------------------
+    RunService.Heartbeat:Connect(function()
+        -- If both systems are off, do nothing.
+        if not Config.AimEnabled and not Config.HighlightEnabled then
+            TargetHighlight.Enabled = false
+            return
+        end
+
+        local target = GetClosestTarget()
+        if not target then
+            TargetHighlight.Enabled = false
+            return
+        end
+
+        -- Highlight logic (independent of aimbot enable)
+        if Config.HighlightEnabled then
+            TargetHighlight.Adornee = target
+            TargetHighlight.FillColor = RGBToColor3(Config.HighlightColor)
+            TargetHighlight.Enabled = true
+        else
+            TargetHighlight.Enabled = false
+        end
+
+        -- Aimbot logic
+        if Config.AimEnabled then
+            local part = GetBodyPart(target)
+            if part then
+                local targetPos = part.Position
+                local hum = target:FindFirstChild("Humanoid")
+                if hum and Config.Prediction > 0 then
+                    targetPos = targetPos + (part.Velocity * Config.Prediction)
+                end
+                if part.Name == "Head" then
+                    targetPos = targetPos + Vector3.new(0, 0.05, 0)
+                end
+                local goalCF = CFrame.new(Camera.CFrame.Position, targetPos)
+                Camera.CFrame = Camera.CFrame:Lerp(goalCF, Config.Smoothness)
+            end
+        end
+    end)
+
+    -----------------------------------------------------------------
+    -- LOADING ANIMATION & FINALIZE
+    -----------------------------------------------------------------
+    local function animateLoading()
+        for _, step in ipairs(loadingSteps) do
+            LoadingStatus.Text = step.text
+            TweenService:Create(
+                LoadingProgress,
+                TweenInfo.new(0.3, Enum.EasingStyle.Quad),
+                {Size = UDim2.new(step.progress, 0, 1, 0)}
+            ):Play()
+            task.wait(0.4)
+        end
+        
+        task.wait(0.3)
+        LoadingGui:Destroy()
+        
+        FOVCircle.Visible = Config.ShowFOV
+        Crosshair.Visible = Config.ShowCrosshair
+        HorizontalLine.Visible = Config.ShowCrosshair
+        VerticalLine.Visible = Config.ShowCrosshair
+        UpdateFOVPosition()
+        
+        if showUpdatePanel then
+            task.wait(0.5)
+            UpdatePanel.Visible = true
+            UpdatePanel.Size = UDim2.new(0, 0, 0, 0)
+            UpdatePanel.Position = UDim2.new(0.5, 0, 0.5, 0)
+            TweenService:Create(
+                UpdatePanel,
+                TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+                {Size = UDim2.new(0, 400, 0, 320), Position = UDim2.new(0.5, -200, 0.5, -160)}
+            ):Play()
+        end
+        
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "LENNY HUB " .. CURRENT_VERSION,
+            Text = IsMobile and "Loaded on Mobile!" or "Loaded on PC!",
+            Duration = 5
+        })
+    end
+
+    animateLoading()
+    MainFrame.Visible = true
+end
